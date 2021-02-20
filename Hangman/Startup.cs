@@ -35,7 +35,7 @@ namespace Hangman
             services.AddDbContext<SqlContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("SqlConnection")));
 
-            // Health-checking services
+            // Health-check services
             services.AddHealthChecks()
                 .AddNpgSql(Configuration.GetConnectionString("SqlConnection"));
 
@@ -55,8 +55,8 @@ namespace Hangman
             // Misc
             services.AddHttpContextAccessor();
 
-            // AspNetCore Controllers
-            services.AddControllers()
+            // MVC features
+            services.AddControllers()  // AddMvcCore + Data annotations + auth pipelines (no Razor view engine) 
                 .AddNewtonsoftJson(options =>
                     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
         }
@@ -65,20 +65,29 @@ namespace Hangman
         {
             logger.LogInformation("Configuring start up with environment: {EnvironmentName}", env.EnvironmentName);
 
-            // Stacktrace pages
-            if (env.IsDevelopment() || env.IsEnvironment("Local")) app.UseDeveloperExceptionPage();
+            // Middleware for Stacktrace pages
+            if (env.IsEnvironment("Local"))
+                app.UseDeveloperExceptionPage();
+            else
+                app.UseExceptionHandler("/handler"); // Middleware for sending exceptions to exc controller handler
 
             // Middleware for condensing many access log lines into a SINGLE useful one
             app.UseSerilogRequestLogging();
 
-            // HTTPs redirection middleware
+            // Middleware for HTTP-to-HTTPS redirection
             app.UseHttpsRedirection();
+
+            // Middleware for request matching/resolution to endpoints
             app.UseRouting();
+
+            // Middleware for authorization (always after UseRouting so request routing is available
+            // and before UseEndpoints so users are authorized or not before using endpoints)
             app.UseAuthorization();
 
             // Middleware for activating the healthcheck UI
             app.UseHealthChecksUI(options => options.UIPath = "/healthcheck-dashboard");
 
+            // Middleware for execution of the requests (decoupled from UseRouting -- bare resolution)
             app.UseEndpoints(endpoints =>
             {
                 // changes health-check endpoint to return a JSON rather than plain/text 'Healthy'
@@ -89,6 +98,7 @@ namespace Hangman
                     ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
                 });
 
+                // Controllers execute their requests
                 endpoints.MapControllers();
             });
 

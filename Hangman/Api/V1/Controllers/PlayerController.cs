@@ -6,7 +6,7 @@ using Hangman.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-namespace Hangman.Controllers.V1
+namespace Hangman.Api.V1.Controllers
 {
     [ApiController]
     [Route("api/v1/[controller]")]

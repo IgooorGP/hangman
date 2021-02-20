@@ -7,8 +7,12 @@ using Hangman.DTOs;
 using Hangman.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Hangman.Infrastructure;
+using Hangman.Exceptions;
+using System.Net;
+using Microsoft.EntityFrameworkCore;
 
-namespace Hangman.Controllers.V1
+namespace Hangman.Api.V1.Controllers
 {
     [ApiController]
     [Route("api/v1/[controller]")]
@@ -17,14 +21,17 @@ namespace Hangman.Controllers.V1
         private readonly IGameRoomServiceAsync _gameRoomServiceAsync;
         private readonly IPlayerServiceAsync _playerServiceAsync;
         private readonly ILogger<GameRoomController> _logger;
+        private readonly SqlContext _db;
 
         public GameRoomController(IGameRoomServiceAsync gameRoomServiceAsync,
             IPlayerServiceAsync playerServiceAsync,
-            ILogger<GameRoomController> logger)
+            ILogger<GameRoomController> logger,
+            SqlContext db)
         {
             _gameRoomServiceAsync = gameRoomServiceAsync;
             _playerServiceAsync = playerServiceAsync;
             _logger = logger;
+            _db = db;
         }
 
         [HttpGet]
@@ -32,19 +39,23 @@ namespace Hangman.Controllers.V1
         public async Task<ActionResult<GameRoom>> GetById(Guid gameRoomId)
         {
             _logger.LogInformation("Calling gameRoomService to get room with id: {id:l}", gameRoomId);
-            var gameRoom = await _gameRoomServiceAsync.GetById(gameRoomId);
+            var gameRoom = await _db.GameRooms.FindAsync(gameRoomId);
 
-            if (gameRoom != null) return Ok(gameRoom);
-            return NotFound();
+            if (gameRoom is null)
+                throw new HttpStatusException(HttpStatusCode.NotFound, "Game room was not found.");
+
+            return Ok(gameRoom);
         }
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<GameRoom>>> All()
         {
-            _logger.LogInformation("Calling gameRoomService to get all rooms...");
-            var gameRooms = await _gameRoomServiceAsync.GetAll();
+            _logger.LogInformation("Getting all game rooms...");
+            var gameRooms = await _db.GameRooms.ToListAsync();
 
-            _logger.LogInformation("Returning all gameRooms...");
+            if (!gameRooms.Any())
+                throw new HttpStatusException(HttpStatusCode.NotFound, "No game rooms were found!");
+
             return Ok(gameRooms);
         }
 
