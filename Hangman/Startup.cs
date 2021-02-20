@@ -30,42 +30,52 @@ namespace Hangman
 
         public void ConfigureServices(IServiceCollection services)
         {
-            // injection of health-checking services (database, cache, etc. goes here)
+            // SQL context
+            services.AddDbContext<HangmanDbContext>(options =>
+                options.UseNpgsql(Configuration.GetConnectionString("SqlConnection")));
+
+            // Health-checking services
             services.AddHealthChecks()
                 .AddNpgSql(Configuration.GetConnectionString("SqlConnection"));
 
-            // injection of the friendly health-check UI service (requires DB for health history persistence)
-            // configuration of endpoints for the UI client on the 'HealthChecksUI' of appsettings.json
+            // Health-check UI
             services.AddHealthChecksUI()
                 .AddPostgreSqlStorage(Configuration.GetConnectionString("SqlConnection"));
 
-            // injection os other services
-            services.AddHttpContextAccessor()
-                .AddDbContext<HangmanDbContext>(options =>
-                    options.UseNpgsql(Configuration.GetConnectionString("SqlConnection")))
-                .AddScoped(typeof(IHangmanRepositoryAsync<>), typeof(HangmanRepositoryAsync<>)) // generic repository
+            // Automapper
+            services.AddAutoMapper(typeof(Startup));
+
+            // Application services
+            services.AddScoped(typeof(IHangmanRepositoryAsync<>), typeof(HangmanRepositoryAsync<>))
                 .AddScoped<IGameRoomServiceAsync, GameRoomServiceAsync>()
                 .AddScoped<IPlayerServiceAsync, PlayerServiceAsync>()
-                .AddScoped<IHangmanGame, HangmanGame>()
-                .AddAutoMapper(typeof(Startup))
-                .AddControllers()
-                .AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);  // ignore loops when serializing JSON
+                .AddScoped<IHangmanGame, HangmanGame>();
+
+            // Misc
+            services.AddHttpContextAccessor();
+
+            // AspNetCore Controllers
+            services.AddControllers()
+                .AddNewtonsoftJson(options =>
+                    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
         {
             logger.LogInformation("Configuring start up with environment: {EnvironmentName}", env.EnvironmentName);
 
-            // dev exceptionss
+            // Stacktrace pages
             if (env.IsDevelopment() || env.IsEnvironment("Local")) app.UseDeveloperExceptionPage();
 
-            // middleware for condensing many access log lines into a SINGLE useful one
+            // Middleware for condensing many access log lines into a SINGLE useful one
             app.UseSerilogRequestLogging();
+
+            // HTTPs redirection middleware
             app.UseHttpsRedirection();
             app.UseRouting();
             app.UseAuthorization();
 
-            // middleware for activating the healthcheck UI
+            // Middleware for activating the healthcheck UI
             app.UseHealthChecksUI(options => options.UIPath = "/healthcheck-dashboard");
 
             app.UseEndpoints(endpoints =>
@@ -81,7 +91,7 @@ namespace Hangman
                 endpoints.MapControllers();
             });
 
-            // Migrations and seeding for running locally
+            // Migrations and seeding
             Migrate(app, logger, executeSeedDb: env.IsEnvironment("Local"));
 
             logger.LogInformation("Host configuration is all done!");
