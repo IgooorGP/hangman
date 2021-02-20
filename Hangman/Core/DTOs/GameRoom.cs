@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Hangman.Core.DTOs
@@ -8,6 +9,14 @@ namespace Hangman.Core.DTOs
         [Required]
         [StringLength(100, ErrorMessage = "Game room name can't exceed 100 characters.")]
         public string Name { get; set; } = default!;
+    }
+
+    public class GameRoomResponseDTO
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = "";
+        public ICollection<PlayerResponseDTO>? Players { get; set; }
+        public ICollection<GuessWordResponseDTO>? GuessWords { get; set; }
     }
 
     public class PlayerDTO

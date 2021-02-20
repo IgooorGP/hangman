@@ -17,6 +17,7 @@ using Microsoft.Extensions.Logging;
 using Serilog;
 using AutoMapper;
 using Hangman.Core.Infrastructure;
+using FluentValidation.AspNetCore;
 
 namespace Hangman
 {
@@ -56,7 +57,8 @@ namespace Hangman
             services.AddHttpContextAccessor();
 
             // MVC features
-            services.AddControllers()  // AddMvcCore + Data annotations + auth pipelines (no Razor view engine) 
+            services.AddControllers()  // AddMvcCore() + Data annotations + auth pipelines (no Razor view engine though) 
+                .AddFluentValidation()  // validations for incoming DTOs
                 .AddNewtonsoftJson(options =>
                     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
         }

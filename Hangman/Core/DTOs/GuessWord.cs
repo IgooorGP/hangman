@@ -7,6 +7,7 @@ namespace Hangman.Core.DTOs
         public string GuessWord { get; set; } = null!;
         public Guid PlayerId { get; set; }
     }
+
     public class GuessWordDTO
     {
         public string GuessWord { get; set; } = null!;
@@ -22,7 +23,8 @@ namespace Hangman.Core.DTOs
 
     public class GuessWordResponseDTO
     {
-        public string GuessWord { get; set; } = null!;
         public Guid Id { get; set; }  // created guess word id
+        public string Word { get; set; } = "";
+        public Guid GameRoomId { get; set; }
     }
 }

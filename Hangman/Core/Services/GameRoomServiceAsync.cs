@@ -176,7 +176,7 @@ namespace Hangman.Core.Services
             newGuessWord.Round = gameRound; // 1-to-1 relationship must be also created!
             await _repositoryGuessWord.Save(newGuessWord);
 
-            return new GuessWordResponseDTO { Id = newGuessWord.Id, GuessWord = newGuessWord.Word };
+            return new GuessWordResponseDTO { Id = newGuessWord.Id, Word = newGuessWord.Word };
         }
 
         public async Task<GuessLetter> CreateGuessLetter(GuessWord guessWord, string guessLetter)

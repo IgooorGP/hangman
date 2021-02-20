@@ -1,5 +1,5 @@
 ### gets room by id
-GET http://localhost:8080/api/v1/gameroom/123
+GET http://localhost:8080/api/v1/gameroom/822558a6-a118-4513-9e83-e81399cfa7a7
 Content-Type: application/json
 
 ### gets all rooms (default pagination)
@@ -8,8 +8,8 @@ Content-Type: application/json
 
 ### gets all rooms (paginated)
 GET http://localhost:8080/api/v1/gameroom/
-    ?offset=2
-    &limit=4
+    ?pageSize=2
+    &pageNumber=1
 Content-Type: application/json
 
 ### gets gamerooms by name (paginated)
@@ -24,7 +24,5 @@ POST http://localhost:8080/api/v1/gameroom/
 Content-Type: application/json
 
 {
-    "name": "igu room",
-    "description": "a nice room",
-    "max_concurrent_users": 2
+    "name": "igu room 3"
 }
