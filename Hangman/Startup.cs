@@ -1,22 +1,22 @@
 using System.Collections.Generic;
 using System.Linq;
-using Hangman.Services;
-using Hangman.Business;
-using Hangman.Models;
+using Hangman.Core.Services;
+using Hangman.Core.Business;
+using Hangman.Core.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Hangman.Repository;
-using Hangman.Repository.Interfaces;
+using Hangman.Core.Repository;
+using Hangman.Core.Repository.Interfaces;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using AutoMapper;
-using Hangman.Infrastructure;
+using Hangman.Core.Infrastructure;
 
 namespace Hangman
 {

@@ -1,9 +1,9 @@
 using System.Linq;
 using Hangman;
-using Hangman.Services;
-using Hangman.Business;
-using Hangman.Repository;
-using Hangman.Repository.Interfaces;
+using Hangman.Core.Services;
+using Hangman.Core.Business;
+using Hangman.Core.Repository;
+using Hangman.Core.Repository.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using AutoMapper;
 using Serilog;
+using Hangman.Core.Infrastructure;
 
 namespace Tests.Hangman.Support
 {

@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Hangman.Services;
-using Hangman.DTOs;
-using Hangman.Models;
+using Hangman.Core.Services;
+using Hangman.Core.DTOs;
+using Hangman.Core.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Hangman.Infrastructure;
-using Hangman.Exceptions;
+using Hangman.Core.Infrastructure;
+using Hangman.Core.Exceptions;
 using System.Net;
 using Microsoft.EntityFrameworkCore;
 

@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using Hangman.Exceptions;
+using Hangman.Core.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

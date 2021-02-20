@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Hangman.Models;
-using Hangman.Repository;
+using Hangman.Core.Infrastructure;
+using Hangman.Core.Models;
 
 namespace Tests.Hangman.Support
 {
@@ -50,8 +50,8 @@ namespace Tests.Hangman.Support
         public async Task<Tuple<GameRoom, Player, GameRoomPlayer>> BuildScenarioWithAPlayerInRoom(
             bool isInRoom = true, bool isHost = false, bool isBanned = false)
         {
-            var player = new Player() {Name = "Player 1"};
-            var gameRoom = new GameRoom() {Name = "Game Room 1"};
+            var player = new Player() { Name = "Player 1" };
+            var gameRoom = new GameRoom() { Name = "Game Room 1" };
             var gameRoomPlayer = new GameRoomPlayer()
             {
                 GameRoom = gameRoom,
@@ -65,7 +65,7 @@ namespace Tests.Hangman.Support
             await _context.AddAsync(gameRoom);
             await _context.AddAsync(gameRoomPlayer);
             await _context.SaveChangesAsync();
-            
+
             return Tuple.Create(gameRoom, player, gameRoomPlayer);
         }
     }

@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Tests.Hangman.Support;
-using HangmanProject = Hangman;
 using Xunit;
 
 

@@ -1,6 +1,6 @@
 using System;
 using System.Net.Http;
-using Hangman.Repository;
+using Hangman.Core.Infrastructure;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
@@ -18,7 +18,7 @@ namespace Tests.Hangman.Support
     {
         // private testing properties
         private readonly IDbContextTransaction _transaction;
-     
+
         // properties used by testing classes
         protected readonly HttpClient Client;
         protected SqlContext DbContext { get; }
