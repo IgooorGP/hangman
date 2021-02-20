@@ -51,7 +51,8 @@ namespace Hangman
             services.AddScoped(typeof(IHangmanRepositoryAsync<>), typeof(HangmanRepositoryAsync<>))
                 .AddScoped<IGameRoomServiceAsync, GameRoomServiceAsync>()
                 .AddScoped<IPlayerServiceAsync, PlayerServiceAsync>()
-                .AddScoped<IHangmanGame, HangmanGame>();
+                .AddScoped<IHangmanGame, HangmanGame>()
+                .AddScoped<IGameRoomSvc, GameRoomSvc>();
 
             // Misc
             services.AddHttpContextAccessor();

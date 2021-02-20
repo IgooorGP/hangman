@@ -21,17 +21,20 @@ namespace Hangman.Api.V1.Controllers
     public class GameRoomController : ControllerBase
     {
         private readonly IGameRoomServiceAsync _gameRoomServiceAsync;
+        private readonly IGameRoomSvc _gameRoomSvc;
         private readonly IPlayerServiceAsync _playerServiceAsync;
         private readonly ILogger<GameRoomController> _logger;
         private readonly IMapper _mapper;
         private readonly SqlContext _db;
 
-        public GameRoomController(IGameRoomServiceAsync gameRoomServiceAsync,
+        public GameRoomController(IGameRoomSvc gameRoomSvc,
+            IGameRoomServiceAsync gameRoomServiceAsync,
             IPlayerServiceAsync playerServiceAsync,
             ILogger<GameRoomController> logger,
             IMapper mapper,
             SqlContext db)
         {
+            _gameRoomSvc = gameRoomSvc;
             _gameRoomServiceAsync = gameRoomServiceAsync;
             _playerServiceAsync = playerServiceAsync;
             _logger = logger;
@@ -41,32 +44,21 @@ namespace Hangman.Api.V1.Controllers
 
         [HttpGet]
         [Route("{gameRoomId}")]
-        public async Task<ActionResult> GetById(Guid gameRoomId)
+        public async Task<ActionResult> GetById([FromRoute] Guid gameRoomId)
         {
-            _logger.LogInformation("Calling gameRoomService to get room with id: {id:l}", gameRoomId);
-            var gameRoom = await _db.GameRooms.FindAsync(gameRoomId);
+            var gameRoom = await _gameRoomSvc.GetById(gameRoomId);
+            var gameRoomResponse = _mapper.Map<GameRoom, GameRoomResponseDTO>(gameRoom);
 
-            if (gameRoom is null)
-                throw new HttpStatusException(HttpStatusCode.NotFound, "Game room was not found.");
-
-            return Ok(_mapper.Map<GameRoom, GameRoomResponseDTO>(gameRoom));
+            return Ok(gameRoomResponse);
         }
 
         [HttpGet]
         public async Task<ActionResult> All(int pageSize = 10, int pageNumber = 1)
         {
-            _logger.LogInformation("Getting paginated game rooms...");
-            var gameRoomsQuery = _db.GameRooms
-                .Include(room => room.GameRoomPlayers)
-                .Include(room => room.GuessWords)
-                .OrderBy(room => room.CreatedAt)
-                .Paginate(pageSize, pageNumber);
+            var (gameRooms, totalGameRooms) = await _gameRoomSvc.GetPaginated(pageSize, pageNumber);
+            var gameRoomsResponse = _mapper.Map<IList<GameRoom>, IList<GameRoomResponseDTO>>(gameRooms);
 
-            var totalGameRooms = await _db.GameRooms.CountAsync();
-            var gameRoomListResponse = await _mapper
-                .ProjectTo<GameRoomResponseDTO>(gameRoomsQuery).ToListAsync();
-
-            return Ok(new PaginatedResponse(gameRoomListResponse, gameRoomListResponse.Count, totalGameRooms));
+            return Ok(new PaginatedResponse(gameRoomsResponse, gameRoomsResponse.Count, totalGameRooms));
         }
 
         [HttpPost]
