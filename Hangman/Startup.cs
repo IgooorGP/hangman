@@ -28,22 +28,21 @@ namespace Hangman
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             // injection of health-checking services (database, cache, etc. goes here)
             services.AddHealthChecks()
-                .AddNpgSql(Configuration.GetConnectionString("DBConnection"));
+                .AddNpgSql(Configuration.GetConnectionString("SqlConnection"));
 
             // injection of the friendly health-check UI service (requires DB for health history persistence)
             // configuration of endpoints for the UI client on the 'HealthChecksUI' of appsettings.json
             services.AddHealthChecksUI()
-                .AddPostgreSqlStorage(Configuration.GetConnectionString("DBConnection"));
+                .AddPostgreSqlStorage(Configuration.GetConnectionString("SqlConnection"));
 
             // injection os other services
             services.AddHttpContextAccessor()
                 .AddDbContext<HangmanDbContext>(options =>
-                    options.UseNpgsql(Configuration.GetConnectionString("DBConnection")))
+                    options.UseNpgsql(Configuration.GetConnectionString("SqlConnection")))
                 .AddScoped(typeof(IHangmanRepositoryAsync<>), typeof(HangmanRepositoryAsync<>)) // generic repository
                 .AddScoped<IGameRoomServiceAsync, GameRoomServiceAsync>()
                 .AddScoped<IPlayerServiceAsync, PlayerServiceAsync>()
@@ -53,23 +52,17 @@ namespace Hangman
                 .AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);  // ignore loops when serializing JSON
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
         {
             logger.LogInformation("Configuring start up with environment: {EnvironmentName}", env.EnvironmentName);
 
-            if (env.IsDevelopment() || env.IsEnvironment("Local"))
-            {
-                app.UseDeveloperExceptionPage();
-            }
-
-            app.UseHttpsRedirection();
+            // dev exceptionss
+            if (env.IsDevelopment() || env.IsEnvironment("Local")) app.UseDeveloperExceptionPage();
 
             // middleware for condensing many access log lines into a SINGLE useful one
             app.UseSerilogRequestLogging();
-
+            app.UseHttpsRedirection();
             app.UseRouting();
-
             app.UseAuthorization();
 
             // middleware for activating the healthcheck UI
@@ -88,14 +81,12 @@ namespace Hangman
                 endpoints.MapControllers();
             });
 
-            // Migrations and seed db (when in development/compose ONLY)
-            Migrate(app, logger,
-                executeSeedDb: env.IsDevelopment() || env.IsEnvironment("Local") || env.IsEnvironment("DockerCompose"));
+            // Migrations and seeding for running locally
+            Migrate(app, logger, executeSeedDb: env.IsEnvironment("Local"));
+
+            logger.LogInformation("Host configuration is all done!");
         }
 
-        /**
-         * Applies possible missing migrations from the database.
-         */
         public static void Migrate(IApplicationBuilder app, ILogger<Startup> logger, bool executeSeedDb = false)
         {
             using var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope();

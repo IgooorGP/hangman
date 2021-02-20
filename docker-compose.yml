@@ -78,44 +78,6 @@ services:
       ELASTIC_PASSWORD: elastic
       discovery.type: single-node
 
-#  logstash:
-#    build:
-#      context: Elk/logstash/
-#      args:
-#        ELK_VERSION: 7.8.0
-#    volumes:
-#      - type: bind
-#        source: ./Elk/logstash/config/logstash.yml
-#        target: /usr/share/logstash/config/logstash.yml
-#        read_only: true
-#      - type: bind
-#        source: ./Elk/logstash/pipeline
-#        target: /usr/share/logstash/pipeline
-#        read_only: true
-#    ports:
-#      - "5000:5000/tcp"
-#      - "5000:5000/udp"
-#      - "9600:9600"
-#    environment:
-#      LS_JAVA_OPTS: "-Xms256m -Xmx512m"
-#    depends_on:
-#      - es
-#
-#  kibana:
-#    build:
-#      context: Elk/kibana/
-#      args:
-#        ELK_VERSION: 7.8.0
-#    volumes:
-#      - type: bind
-#        source: ./Elk/kibana/config/kibana.yml
-#        target: /usr/share/kibana/config/kibana.yml
-#        read_only: true
-#    ports:
-#      - "5601:5601"
-#    depends_on:
-#      - es
-
 volumes:
   elasticsearch:
     name: elasticsearch
