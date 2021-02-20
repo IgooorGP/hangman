@@ -8,9 +8,9 @@ namespace Tests.Hangman.Support
 {
     public class TestingScenarioBuilder
     {
-        private readonly HangmanDbContext _context;
+        private readonly SqlContext _context;
 
-        public TestingScenarioBuilder(HangmanDbContext context)
+        public TestingScenarioBuilder(SqlContext context)
         {
             _context = context;
         }

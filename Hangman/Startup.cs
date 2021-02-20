@@ -16,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using AutoMapper;
+using Hangman.Infrastructure;
 
 namespace Hangman
 {
@@ -31,7 +32,7 @@ namespace Hangman
         public void ConfigureServices(IServiceCollection services)
         {
             // SQL context
-            services.AddDbContext<HangmanDbContext>(options =>
+            services.AddDbContext<SqlContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("SqlConnection")));
 
             // Health-checking services
@@ -100,7 +101,7 @@ namespace Hangman
         public static void Migrate(IApplicationBuilder app, ILogger<Startup> logger, bool executeSeedDb = false)
         {
             using var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope();
-            using var context = serviceScope.ServiceProvider.GetService<HangmanDbContext>();
+            using var context = serviceScope.ServiceProvider.GetService<SqlContext>();
 
             // always execute possible missing migrations
             if (context.Database.GetPendingMigrations().ToList().Any())
@@ -119,7 +120,7 @@ namespace Hangman
         /**
          * Seeds DB with pre-defined entities/models.
          */
-        private static void SeedDb(HangmanDbContext context, ILogger<Startup> logger)
+        private static void SeedDb(SqlContext context, ILogger<Startup> logger)
         {
             if (context.GameRooms.Any())
             {

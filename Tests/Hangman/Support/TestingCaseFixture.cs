@@ -21,7 +21,7 @@ namespace Tests.Hangman.Support
      
         // properties used by testing classes
         protected readonly HttpClient Client;
-        protected HangmanDbContext DbContext { get; }
+        protected SqlContext DbContext { get; }
 
         protected TestingCaseFixture()
         {
@@ -36,7 +36,7 @@ namespace Tests.Hangman.Support
 
             // resolve a DbContext instance from the container and begin a transaction on the context.
             Client = server.CreateClient();
-            DbContext = services.GetRequiredService<HangmanDbContext>();
+            DbContext = services.GetRequiredService<SqlContext>();
             _transaction = DbContext.Database.BeginTransaction();
         }
 

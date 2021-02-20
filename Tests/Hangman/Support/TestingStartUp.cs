@@ -34,7 +34,7 @@ namespace Tests.Hangman.Support
             var startupAssembly = typeof(Startup).Assembly;
 
             services.AddHttpContextAccessor()
-                .AddDbContext<HangmanDbContext>(options =>
+                .AddDbContext<SqlContext>(options =>
                     options.UseNpgsql(Configuration.GetConnectionString("DBConnection")), ServiceLifetime.Singleton)
                 .AddScoped(typeof(IHangmanRepositoryAsync<>), typeof(HangmanRepositoryAsync<>)) // generic repository
                 .AddScoped<IGameRoomServiceAsync, GameRoomServiceAsync>()
@@ -81,11 +81,11 @@ namespace Tests.Hangman.Support
         {
             // testing migrations
             var dbConnectionString = Configuration.GetConnectionString("DBConnection");
-            var options = new DbContextOptionsBuilder<HangmanDbContext>()
+            var options = new DbContextOptionsBuilder<SqlContext>()
                 .UseNpgsql(dbConnectionString)
                 .Options;
 
-            var context = new HangmanDbContext(options);
+            var context = new SqlContext(options);
 
             // always execute possible missing migrations
             if (!context.Database.GetPendingMigrations().ToList().Any()) return;

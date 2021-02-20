@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Hangman.Infrastructure;
 using Hangman.Models;
 using Hangman.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -14,33 +15,33 @@ namespace Hangman.Repository
     */
     public class HangmanRepositoryAsync<T> : IHangmanRepositoryAsync<T> where T : BaseEntity
     {
-        private readonly HangmanDbContext _dbContext;
+        private readonly SqlContext _dbContext;
         private readonly DbSet<T> _dbSet;
-        
-        public HangmanRepositoryAsync(HangmanDbContext dbContext)
+
+        public HangmanRepositoryAsync(SqlContext dbContext)
         {
             _dbContext = dbContext;
             _dbSet = _dbContext.Set<T>();
         }
 
         public async ValueTask<T?> GetById(Guid id) => await _dbSet.FindAsync(id);  // FindAsync uses primary key -> 1 result
-        
+
         public async ValueTask<T?> GetById(Guid id, IEnumerable<string> includes)
         {
             var entityExists = await GetById(id) != null;
             if (!entityExists) return null;
-            
+
             // adds extra relationships (breaks) if entitiy is not found by id
             return await includes.Aggregate(_dbSet.Where(entity => entity.Id == id).AsQueryable(), (query, path) => query.Include(path)).FirstAsync();
         }
-        
+
         public async ValueTask<T?> Get(Expression<Func<T, bool>> filterPredicate) => await _dbSet.SingleOrDefaultAsync(filterPredicate); // 1 result or raise
 
         public async Task<IEnumerable<T>> All()
         {
             return await _dbSet.ToListAsync();
         }
-        
+
         public async Task<IEnumerable<T>> All(IEnumerable<string> includes)
         {
             // adds extra relationships
@@ -53,13 +54,13 @@ namespace Hangman.Repository
             {
                 return await _dbSet.ToListAsync();
             }
-            
+
             return await _dbSet.Where(filterPredicate).ToListAsync();
         }
 
         public async Task Save(T entity)
         {
-            await _dbSet.AddAsync(entity); 
+            await _dbSet.AddAsync(entity);
             await _dbContext.SaveChangesAsync();
         }
 
@@ -81,7 +82,7 @@ namespace Hangman.Repository
             {
                 return await _dbSet.CountAsync();
             }
-            
+
             return await _dbSet.CountAsync(predicate);
         }
     }

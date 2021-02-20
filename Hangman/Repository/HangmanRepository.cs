@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using Hangman.Infrastructure;
 using Hangman.Models;
 using Hangman.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -13,28 +14,28 @@ namespace Hangman.Repository
     */
     public class HangmanRepository<T> : IHangmanRepository<T> where T : BaseEntity
     {
-        private readonly HangmanDbContext _dbContext;
+        private readonly SqlContext _dbContext;
         private readonly DbSet<T> _dbSet;
-        
-        public HangmanRepository(HangmanDbContext dbContext)
+
+        public HangmanRepository(SqlContext dbContext)
         {
             _dbContext = dbContext;
             _dbSet = _dbContext.Set<T>();
         }
 
         public T GetById(Guid id) => _dbSet.SingleOrDefault(e => e.Id == id);
-        
+
         public IEnumerable<T> All() => _dbSet.ToList();
 
         public IEnumerable<T> Filter(Expression<Func<T, bool>>? filterPredicate = null)
         {
             var query = _dbSet.AsQueryable();
-            
+
             if (filterPredicate != null)
             {
                 query = query.Where(filterPredicate);
             }
-            
+
             return query.ToList();
         }
 
