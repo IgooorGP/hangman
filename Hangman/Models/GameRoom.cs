@@ -5,6 +5,10 @@ using Newtonsoft.Json;
 
 namespace Hangman.Models
 {
+    /// <summary>
+    /// Models a game room in which a guess words are created and are joined by
+    /// many players.
+    /// </summary>
     public class GameRoom : BaseEntity
     {
         [Required]
@@ -18,61 +22,9 @@ namespace Hangman.Models
         public ICollection<GuessWord> GuessWords { get; set; } = null!;
     }
 
-    public class GameRound : BaseEntity
-    {
-        [Range(0, 6)]
-        public int Health { get; set; } = 6;
-
-        public bool IsOver { get; set; } = false;
-
-        // 1-to-1 with GuessWord 
-        public GuessWord GuessWord { get; set; } = null!;
-
-        public Guid GuessWordId { get; set; }
-    }
-
-    public class GuessWord : BaseEntity
-    {
-        [Required]
-        public GameRoom GameRoom { get; set; } = null!;
-
-        [Required]
-        public Guid GameRoomId { get; set; }
-
-        [Required]
-        [MaxLength(255)]
-        public string Word { get; set; } = null!;
-
-        public GameRound Round { get; set; } = null!;
-
-        public ICollection<GuessLetter> GuessLetters { get; set; } = null!;
-    }
-
-    public class GuessLetter : BaseEntity
-    {
-        [Required]
-        public GuessWord GuessWord { get; set; } = null!;
-
-        [Required]
-        public Guid GuessWordId { get; set; }
-
-        [Required]
-        [MaxLength(1)]
-        public string Letter { get; set; } = null!;
-    }
-
-    public class Player : BaseEntity
-    {
-        [Required]
-        [MaxLength(255)]
-        public string Name { get; set; } = null!;
-
-        // fk to join table for many-to-many relationships to access GameRooms
-        // ignored on jsons: past of a user may bring too many results
-        [JsonIgnore]
-        public ICollection<GameRoomPlayer> GameRoomPlayers { get; set; } = null!;
-    }
-
+    /// <summary>
+    /// Intertable for wiring-up the many-to-many relationship between GameRoom and Player.
+    /// </summary>
     public class GameRoomPlayer : BaseEntity
     {
         [Required]
