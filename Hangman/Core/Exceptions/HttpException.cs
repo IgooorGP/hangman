@@ -7,9 +7,14 @@ namespace Hangman.Core.Exceptions
     {
         public HttpStatusCode Status { get; private set; }
 
-        public HttpStatusException(HttpStatusCode status, string msg) : base(msg)
+        public HttpStatusException(string msg, HttpStatusCode status) : base(msg)
         {
             Status = status;
         }
+    }
+
+    public class ObjectDoesNotExist : HttpStatusException
+    {
+        public ObjectDoesNotExist(string msg) : base(msg, HttpStatusCode.NotFound) { }
     }
 }

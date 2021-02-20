@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Hangman.Core.DTOs
 {
@@ -9,6 +10,18 @@ namespace Hangman.Core.DTOs
         [Required]
         [StringLength(100, ErrorMessage = "Game room name can't exceed 100 characters.")]
         public string Name { get; set; } = default!;
+    }
+
+    public class SearchGameRoomDTO
+    {
+        public int PageSize { get; set; } = 10;
+        public int PageNumber { get; set; } = 1;
+        public string? Name { get; set; }
+    }
+
+    public class CreateGameRoomDTO
+    {
+        public string Name { get; set; } = "";
     }
 
     public class GameRoomResponseDTO

@@ -15,6 +15,13 @@ namespace Hangman.Core.Infrastructure
             return query.Skip(paginationParams.ItemsToSkip).Take(paginationParams.PageSize);
         }
 
+        public static IQueryable<T> Paginate<T>(this IQueryable<T> query, int pageSize, int pageNumber)
+        {
+            var paginationParams = new ValidPaginationParams(pageSize, pageNumber);
+
+            return query.Skip(paginationParams.ItemsToSkip).Take(paginationParams.PageSize);
+        }
+
         /// <summary>
         /// Nested class that represents pagination parameters after validation.
         /// </summary>

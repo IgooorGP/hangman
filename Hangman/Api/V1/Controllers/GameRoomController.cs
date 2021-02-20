@@ -8,9 +8,6 @@ using Hangman.Core.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Hangman.Core.Infrastructure;
-using Hangman.Core.Exceptions;
-using System.Net;
-using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 using Hangman.Api.Pagination;
 
@@ -53,9 +50,9 @@ namespace Hangman.Api.V1.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> All(int pageSize = 10, int pageNumber = 1)
+        public async Task<ActionResult> All([FromQuery] SearchGameRoomDTO searchGameRoomDTO)
         {
-            var (gameRooms, totalGameRooms) = await _gameRoomSvc.GetPaginated(pageSize, pageNumber);
+            var (gameRooms, totalGameRooms) = await _gameRoomSvc.GetPaginated(searchGameRoomDTO);
             var gameRoomsResponse = _mapper.Map<IList<GameRoom>, IList<GameRoomResponseDTO>>(gameRooms);
 
             return Ok(new PaginatedResponse(gameRoomsResponse, gameRoomsResponse.Count, totalGameRooms));
