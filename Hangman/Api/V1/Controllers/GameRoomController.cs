@@ -18,25 +18,22 @@ namespace Hangman.Api.V1.Controllers
     public class GameRoomController : ControllerBase
     {
         private readonly IGameRoomServiceAsync _gameRoomServiceAsync;
-        private readonly IGameRoomSvc _gameRoomSvc;
         private readonly IPlayerServiceAsync _playerServiceAsync;
         private readonly ILogger<GameRoomController> _logger;
+        private readonly IGameRoomSvc _gameRoomSvc;
         private readonly IMapper _mapper;
-        private readonly SqlContext _db;
 
         public GameRoomController(IGameRoomSvc gameRoomSvc,
             IGameRoomServiceAsync gameRoomServiceAsync,
             IPlayerServiceAsync playerServiceAsync,
             ILogger<GameRoomController> logger,
-            IMapper mapper,
-            SqlContext db)
+            IMapper mapper)
         {
-            _gameRoomSvc = gameRoomSvc;
             _gameRoomServiceAsync = gameRoomServiceAsync;
             _playerServiceAsync = playerServiceAsync;
+            _gameRoomSvc = gameRoomSvc;
             _logger = logger;
             _mapper = mapper;
-            _db = db;
         }
 
         [HttpGet]
@@ -59,12 +56,12 @@ namespace Hangman.Api.V1.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<GameRoom>> Create(GameRoomDTO gameRoomDTO)
+        public async Task<ActionResult> Create(CreateGameRoomDTO createGameRoomDTO)
         {
-            var gameRoom = await _gameRoomServiceAsync.Create(gameRoomDTO);
-            _logger.LogInformation("New room has been created: {@gameRoom}", gameRoom);
+            var createdGameRoom = await _gameRoomSvc.Create(createGameRoomDTO);
+            var gameRoomResponse = _mapper.Map<GameRoom, GameRoomResponseDTO>(createdGameRoom);
 
-            return CreatedAtAction(nameof(GetById), new { gameRoomId = gameRoom.Id }, gameRoom);
+            return CreatedAtAction(nameof(GetById), new { gameRoomId = gameRoomResponse.Id }, gameRoomResponse);
         }
 
         [HttpPost]

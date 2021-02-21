@@ -1,12 +1,14 @@
 using FluentValidation;
 using Hangman.Core.DTOs;
-using Hangman.Core.Services;
 
 namespace Hangman.Core.Validations
 {
+    /// <summary>
+    /// Validator for new room creations DTOs.
+    /// </summary>
     public class CreateGameRoomDTOValidator : AbstractValidator<CreateGameRoomDTO>
     {
-        public CreateGameRoomDTOValidator(IGameRoomSvc gameRoomSvc)
+        public CreateGameRoomDTOValidator()
         {
             RuleFor(dto => dto.Name)
             .NotEmpty()

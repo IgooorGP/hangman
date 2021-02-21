@@ -8,6 +8,7 @@ namespace Hangman.Core.DTOs.Mappings
         public DTO2Domain()
         {
             CreateMap<GameRoomDTO, GameRoom>();
+            CreateMap<CreateGameRoomDTO, GameRoom>();
         }
     }
 }

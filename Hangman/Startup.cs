@@ -18,6 +18,9 @@ using Serilog;
 using AutoMapper;
 using Hangman.Core.Infrastructure;
 using FluentValidation.AspNetCore;
+using FluentValidation;
+using Hangman.Core.DTOs;
+using Hangman.Core.Validations;
 
 namespace Hangman
 {
@@ -62,6 +65,9 @@ namespace Hangman
                 .AddFluentValidation()  // validations for incoming DTOs
                 .AddNewtonsoftJson(options =>
                     options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+
+            // Fluent Validators
+            services.AddTransient<IValidator<CreateGameRoomDTO>, CreateGameRoomDTOValidator>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
