@@ -1,7 +1,6 @@
 using System.Linq;
-using Microsoft.EntityFrameworkCore.Query;
 
-namespace Hangman.Core.Infrastructure
+namespace Hangman.Infrastructure
 {
     /// <summary>
     /// Extension used to skip database items from the real database query in order to paginate results.

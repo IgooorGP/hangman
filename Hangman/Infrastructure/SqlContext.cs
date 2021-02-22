@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Hangman.Core.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Hangman.Core.Infrastructure
+namespace Hangman.Infrastructure
 {
     /// <summary>
     /// Application's SQL database context.

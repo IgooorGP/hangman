@@ -8,15 +8,13 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Hangman.Core.Repository;
-using Hangman.Core.Repository.Interfaces;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using AutoMapper;
-using Hangman.Core.Infrastructure;
+using Hangman.Infrastructure;
 using FluentValidation.AspNetCore;
 using FluentValidation;
 using Hangman.Core.DTOs;
@@ -51,11 +49,8 @@ namespace Hangman
             services.AddAutoMapper(typeof(Startup));
 
             // Application services
-            services.AddScoped(typeof(IHangmanRepositoryAsync<>), typeof(HangmanRepositoryAsync<>))
-                .AddScoped<IGameRoomServiceAsync, GameRoomServiceAsync>()
-                .AddScoped<IPlayerServiceAsync, PlayerServiceAsync>()
-                .AddScoped<IHangmanGame, HangmanGame>()
-                .AddScoped<IGameRoomSvc, GameRoomSvc>();
+            services.AddScoped<IGameRoomSvc, GameRoomSvc>()
+                .AddScoped<IHangmanGame, HangmanGame>();
 
             // Misc
             services.AddHttpContextAccessor();

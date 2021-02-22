@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Hangman.Core.Infrastructure;
+using Hangman.Infrastructure;
 using Hangman.Core.Models;
 
 namespace Tests.Hangman.Support

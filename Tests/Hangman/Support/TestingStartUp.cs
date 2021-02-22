@@ -12,7 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using AutoMapper;
 using Serilog;
-using Hangman.Core.Infrastructure;
+using Hangman.Infrastructure;
 
 namespace Tests.Hangman.Support
 {

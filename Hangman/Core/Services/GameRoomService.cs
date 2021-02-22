@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Hangman.Core.DTOs;
 using Hangman.Core.Exceptions;
-using Hangman.Core.Infrastructure;
+using Hangman.Infrastructure;
 using Hangman.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

@@ -1,6 +1,6 @@
 using System;
 using System.Net.Http;
-using Hangman.Core.Infrastructure;
+using Hangman.Infrastructure;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
