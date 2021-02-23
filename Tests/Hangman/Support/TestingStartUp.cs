@@ -1,9 +1,6 @@
 using System.Linq;
 using Hangman;
-using Hangman.Core.Services;
 using Hangman.Core.Business;
-using Hangman.Core.Repository;
-using Hangman.Core.Repository.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -37,9 +34,6 @@ namespace Tests.Hangman.Support
             services.AddHttpContextAccessor()
                 .AddDbContext<SqlContext>(options =>
                     options.UseNpgsql(Configuration.GetConnectionString("DBConnection")), ServiceLifetime.Singleton)
-                .AddScoped(typeof(IHangmanRepositoryAsync<>), typeof(HangmanRepositoryAsync<>)) // generic repository
-                .AddScoped<IGameRoomServiceAsync, GameRoomServiceAsync>()
-                .AddScoped<IPlayerServiceAsync, PlayerServiceAsync>()
                 .AddScoped<IHangmanGame, HangmanGame>()
                 .AddAutoMapper(startupAssembly)
                 .AddControllers()

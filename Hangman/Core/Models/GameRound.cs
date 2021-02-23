@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel.DataAnnotations;
 
 namespace Hangman.Core.Models
 {
@@ -9,14 +8,11 @@ namespace Hangman.Core.Models
     /// </summary>
     public class GameRound : BaseEntity
     {
-        [Range(0, 6)]
         public int Health { get; set; } = 6;
-
         public bool IsOver { get; set; } = false;
 
-        // 1-to-1 with GuessWord
-        public GuessWord GuessWord { get; set; } = null!;
-
+        // 1-to-1 with GuessWord (FK + unique constraint)        
         public Guid GuessWordId { get; set; }
+        public GuessWord GuessWord { get; set; } = null!;
     }
 }

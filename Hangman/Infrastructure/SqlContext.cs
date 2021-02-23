@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Hangman.Core.Models;
+using Hangman.Infrastructure.FluentSetup;
 using Microsoft.EntityFrameworkCore;
 
 namespace Hangman.Infrastructure
@@ -14,9 +15,11 @@ namespace Hangman.Infrastructure
     {
         public SqlContext(DbContextOptions<SqlContext> options) : base(options) { }
 
+        public DbSet<User> Users { get; set; } = null!;
         public DbSet<GameRoom> GameRooms { get; set; } = null!;
-        public DbSet<Player> Players { get; set; } = null!;
-        public DbSet<GameRoomPlayer> GameRoomPlayers { get; set; } = null!;
+        public DbSet<GameRoomUser> GameRoomUsers { get; set; } = null!;
+        public DbSet<GuessWord> GuessWords { get; set; } = null!;
+        public DbSet<GuessLetter> GuessLetters { get; set; } = null!;
 
         /// <summary>
         /// Override to add CreatedAt and UpdatedAt automatically by using Fluent API.
@@ -37,24 +40,16 @@ namespace Hangman.Infrastructure
         }
 
         /// <summary>
-        /// Calls Fluent API to override conventions. Used to provide a customized join-table
-        /// for the Player and GameRoom many-to-many relationship.
+        /// Uses EF Fluent API to configure models.
         /// </summary>
-        /// <param name="modelBuilder">The model builder.</param>
+        /// <param name="modelBuilder">The model builder to use Fluent API.</param>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<GameRoomPlayer>()
-                .HasKey(gameRoomPlayer => new { gameRoomPlayer.GameRoomId, gameRoomPlayer.PlayerId });
-
-            modelBuilder.Entity<GameRoomPlayer>()
-                .HasOne(gameRoomPlayer => gameRoomPlayer.Player)
-                .WithMany(user => user.GameRoomPlayers)
-                .HasForeignKey(gameRoomPlayer => gameRoomPlayer.PlayerId);
-
-            modelBuilder.Entity<GameRoomPlayer>()
-                .HasOne(gameRoomPlayer => gameRoomPlayer.GameRoom)
-                .WithMany(gameRoom => gameRoom.GameRoomPlayers)
-                .HasForeignKey(gameRoomPlayer => gameRoomPlayer.GameRoomId);
+            FluentUser.Setup(modelBuilder);
+            FluentGameRoom.Setup(modelBuilder);
+            FluentGameRoomUser.Setup(modelBuilder);
+            FluentGuessWord.Setup(modelBuilder);
+            FluentGuessLetter.Setup(modelBuilder);
         }
 
         private void AutomaticallyAddCreatedAndUpdatedAt()

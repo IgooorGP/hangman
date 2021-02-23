@@ -47,7 +47,7 @@ namespace Hangman.Core.Services
         {
             _logger.LogInformation("Getting paginated game rooms...");
             var baseQuery = _db.GameRooms
-                .Include(room => room.GameRoomPlayers)
+                .Include(room => room.GameRoomUsers)
                 .Include(room => room.GuessWords)
                 .OrderBy(room => room.CreatedAt)
                 .AsQueryable();

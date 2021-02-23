@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using Newtonsoft.Json;
 
 namespace Hangman.Core.Models
 {
@@ -11,41 +9,30 @@ namespace Hangman.Core.Models
     /// </summary>
     public class GameRoom : BaseEntity
     {
-        [Required]
-        [MaxLength(255)]
         public string Name { get; set; } = null!;
 
         // fk to join table for many-to-many relationships to access Users
-        public ICollection<GameRoomPlayer> GameRoomPlayers { get; set; } = null!;
+        public ICollection<GameRoomUser> GameRoomUsers { get; set; } = null!;
 
         // one-to-many
         public ICollection<GuessWord> GuessWords { get; set; } = null!;
     }
 
     /// <summary>
-    /// Intertable for wiring-up the many-to-many relationship between GameRoom and Player.
+    /// Intertable for wiring-up the many-to-many relationship between GameRooms and Players.
     /// </summary>
-    public class GameRoomPlayer : BaseEntity
+    public class GameRoomUser : BaseEntity
     {
-        [Required]
+        // one-to-many with GameRoom
         public Guid GameRoomId { get; set; }
-
-        [Required]
         public GameRoom GameRoom { get; set; } = null!;
 
-        [Required]
-        public Player Player { get; set; } = null!;
+        // one-to-many with User
+        public User User { get; set; } = null!;
+        public Guid UserId { get; set; }
 
-        [Required]
-        public Guid PlayerId { get; set; }
-
-        [Required]
+        // extra interjoin table properties
         public bool IsHost { get; set; }
-
-        [Required]
-        public bool IsBanned { get; set; }
-
-        [Required]
         public bool IsInRoom { get; set; }
     }
 }

@@ -10,18 +10,16 @@ namespace Hangman.Core.Models
     /// </summary>
     public class GuessWord : BaseEntity
     {
-        [Required]
+        public string Value { get; set; } = null!;
+
+        // many-to-one fk to GameRoom
+        public Guid GameRoomId { get; set; }
         public GameRoom GameRoom { get; set; } = null!;
 
-        [Required]
-        public Guid GameRoomId { get; set; }
-
-        [Required]
-        [MaxLength(255)]
-        public string Word { get; set; } = null!;
-
+        // one-to-one to Round (unique)
         public GameRound Round { get; set; } = null!;
 
+        // one-to-many with GuessLetter
         public ICollection<GuessLetter> GuessLetters { get; set; } = null!;
     }
 }

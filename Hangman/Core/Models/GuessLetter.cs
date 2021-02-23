@@ -1,6 +1,4 @@
 using System;
-using System.ComponentModel.DataAnnotations;
-using Newtonsoft.Json;
 
 namespace Hangman.Core.Models
 {
@@ -9,14 +7,10 @@ namespace Hangman.Core.Models
     /// </summary>
     public class GuessLetter : BaseEntity
     {
-        [Required]
-        public GuessWord GuessWord { get; set; } = null!;
+        public string Value { get; set; } = string.Empty;
 
-        [Required]
+        // many-to-one fk with GuessWord
         public Guid GuessWordId { get; set; }
-
-        [Required]
-        [MaxLength(1)]
-        public string Letter { get; set; } = null!;
+        public GuessWord GuessWord { get; set; } = null!;
     }
 }

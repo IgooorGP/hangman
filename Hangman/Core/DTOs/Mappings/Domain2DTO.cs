@@ -8,12 +8,10 @@ namespace Hangman.Core.DTOs.Mappings
     {
         public Domain2DTO()
         {
-            CreateMap<GameRoomPlayer, PlayerInRoomDTO>();
-            CreateMap<Player, PlayerResponseDTO>();
             CreateMap<GuessWord, GuessWordResponseDTO>();
             CreateMap<GameRoom, GameRoomResponseDTO>()
                 .ForMember(dst => dst.Players,
-                    opt => opt.MapFrom(src => src.GameRoomPlayers.Select(grp => grp.Player)))
+                    opt => opt.MapFrom(src => src.GameRoomUsers.Select(grp => grp.User)))
                 .ForMember(dst => dst.GuessWords,
                     opt => opt.MapFrom(src => src.GuessWords.Select(word => word)));
         }
