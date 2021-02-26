@@ -84,8 +84,15 @@ namespace Hangman
             // Middleware for request matching/resolution to endpoints
             app.UseRouting();
 
+            // Cors (to be more restrict later)
+            app.UseCors(x => x
+                .AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader());
+
             // Middleware for authorization (always after UseRouting so request routing is available
             // and before UseEndpoints so users are authorized or not before using endpoints)
+            app.UseAuthentication();
             app.UseAuthorization();
 
             // Middleware for activating the healthcheck UI

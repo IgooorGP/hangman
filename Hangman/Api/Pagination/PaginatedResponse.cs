@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Hangman.Api.Pagination
 {
     class PaginatedResponse

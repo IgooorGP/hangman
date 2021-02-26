@@ -17,4 +17,9 @@ namespace Hangman.Core.Exceptions
     {
         public ObjectDoesNotExist(string msg) : base(msg, HttpStatusCode.NotFound) { }
     }
+
+    public class AuthenticationFailure : HttpStatusException
+    {
+        public AuthenticationFailure(string msg) : base(msg, HttpStatusCode.BadRequest) { }
+    }
 }
