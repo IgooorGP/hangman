@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Hangman.Core.DTOs;
 using Hangman.Core.Exceptions;
 using Hangman.Core.Models;
 using Hangman.Infrastructure;
@@ -9,12 +10,13 @@ using Microsoft.Extensions.Logging;
 
 namespace Hangman.Core.Services
 {
-    public class IUserSvc
+    public interface IUserSvc
     {
-
+        public Task<User> Create(CreateUserRequestDTO createUserRequestDTO);
+        public User Authenticate(string username, string password);
     }
 
-    public class UserSvc
+    public class UserSvc : IUserSvc
     {
         private readonly ILogger<UserSvc> _logger;
         private readonly SqlContext _db;
@@ -25,44 +27,51 @@ namespace Hangman.Core.Services
             _db = db;
         }
 
-        public User? Authenticate(string username, string password)
+        public User Authenticate(string username, string password)
         {
-            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
-                return null;
-
+            _logger.LogInformation("User {username} is trying to login...", username);
             var user = _db.Users.SingleOrDefault(x => x.Username == username);
 
-            // check if username exists
-            if (user == null)
+            if (user is null)
+            {
+                _logger.LogInformation("Username was not found...");
                 throw new AuthenticationFailure("Username or password is invalid.");
+            }
 
-            // check if password is correct
-            if (VerifyPasswordHash(password, user.PasswordSalt, user.PasswordDigest))
+            if (!VerifyPasswordHash(password, user.PasswordSalt, user.PasswordDigest))
+            {
+                _logger.LogInformation("Password digest did not match...");
                 throw new AuthenticationFailure("Username or password is invalid.");
+            }
 
-            // authentication successful
+            _logger.LogInformation("User has successfully logged in...");
+
             return user;
         }
 
-
-        public async Task<User> Create(User user, string password)
+        public async Task<User> Create(CreateUserRequestDTO createUserRequestDTO)
         {
-            // validation
-            if (string.IsNullOrWhiteSpace(password))
-                throw new Exception("Password is required");
+            var username = createUserRequestDTO.Username;
+            var password = createUserRequestDTO.Password;
 
-            if (_db.Users.Any(x => x.Username == user.Username))
-                throw new Exception("Username \"" + user.Username + "\" is already taken");
+            if (_db.Users.Any(user => x.Username == user.Username))
+                throw new Exception("Username " + username + "is already taken");
 
             var (passwordSalt, passwordDigest) = HashPassword(password);
 
-            user.PasswordSalt = passwordSalt;
-            user.PasswordDigest = passwordDigest;
+            var newUser = new User
+            {
+                FirstName = createUserRequestDTO.FirstName,
+                LastName = createUserRequestDTO.LastName,
+                Username = createUserRequestDTO.Username,
+                PasswordSalt = passwordSalt,
+                PasswordDigest = passwordDigest
+            };
 
-            await _db.Users.AddAsync(user);
+            await _db.Users.AddAsync(newUser);
             await _db.SaveChangesAsync();
 
-            return user;
+            return newUser;
         }
 
         public Tuple<string, string> HashPassword(string password)
@@ -76,7 +85,7 @@ namespace Hangman.Core.Services
             return new Tuple<string, string>(passwordSalt, passwordDigest);
         }
 
-        private static bool VerifyPasswordHash(string loginAttemptPassword, string storedPasswordSalt, string storedPasswordDigest)
+        public static bool VerifyPasswordHash(string loginAttemptPassword, string storedPasswordSalt, string storedPasswordDigest)
         {
             var storedPasswordSaltBytes = Encoding.UTF8.GetBytes(storedPasswordSalt);
             var storedPasswordDigestBytes = Encoding.UTF8.GetBytes(storedPasswordDigest);

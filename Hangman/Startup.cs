@@ -60,6 +60,7 @@ namespace Hangman
 
             // Application services
             services.AddScoped<IGameRoomSvc, GameRoomSvc>()
+                .AddScoped<IUserSvc, UserSvc>()
                 .AddScoped<IHangmanGame, HangmanGame>();
 
             // Misc

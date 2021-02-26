@@ -14,6 +14,8 @@ namespace Hangman.Core.DTOs.Mappings
                     opt => opt.MapFrom(src => src.GameRoomUsers.Select(grp => grp.User)))
                 .ForMember(dst => dst.GuessWords,
                     opt => opt.MapFrom(src => src.GuessWords.Select(word => word)));
+
+            CreateMap<User, UserResponseDTO>();
         }
     }
 }
