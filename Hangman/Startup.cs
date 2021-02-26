@@ -19,6 +19,7 @@ using FluentValidation.AspNetCore;
 using FluentValidation;
 using Hangman.Core.DTOs;
 using Hangman.Core.Validations;
+using Hangman.Infrastructure.ServiceCollectionExtensions;
 
 namespace Hangman
 {
@@ -47,6 +48,15 @@ namespace Hangman
 
             // Automapper
             services.AddAutoMapper(typeof(Startup));
+
+            // Configs binding
+            var secretsConfig = new SecretsConfig();
+
+            Configuration.Bind("Secrets", secretsConfig);
+            services.AddSingleton(secretsConfig);
+
+            // Authentication with JWT signatures based on HMAC256 private key
+            services.AddJwtAuthentication(Configuration.GetValue<string>("Secrets:JwtSignaturePrivateKey"));
 
             // Application services
             services.AddScoped<IGameRoomSvc, GameRoomSvc>()
