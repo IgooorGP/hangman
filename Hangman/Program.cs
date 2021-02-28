@@ -21,16 +21,16 @@ namespace Hangman
                 .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", optional: true)
                 .AddEnvironmentVariables()
                 .Build();
-            
+
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(configuration)
                 .CreateLogger();
         }
-        
+
         public static void Main(string[] args)
         {
             ConfigureLogger();
-            
+
             try
             {
                 CreateHostBuilder(args).Build().Run();
@@ -46,10 +46,15 @@ namespace Hangman
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
+            // with the new generic IHost, both IWebHost and BackgroudServices are registered, in the end,
+            // as IHostedService which get their StartAsync() method invoked.
+            // Hence, the same generic Host is used to run a WebHost and any other BackgroudServices
             Host.CreateDefaultBuilder(args)
                 .UseSerilog()
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
+                    // webBuilder was already configured with ConfigureAppConfiguration, UseKestrel, 
+                    // UseIISIntegration, etc. So  we enhance it further with Startup.ConfigureServices
                     webBuilder.UseStartup<Startup>();
                 });
     }

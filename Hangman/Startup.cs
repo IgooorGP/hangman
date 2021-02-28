@@ -56,7 +56,7 @@ namespace Hangman
             services.AddSingleton(secretsConfig);
 
             // Authentication with JWT signatures based on HMAC256 private key
-            services.AddJwtAuthentication(Configuration.GetValue<string>("Secrets:JwtSignaturePrivateKey"));
+            // services.AddJwtAuthentication(Configuration.GetValue<string>("Secrets:JwtSignaturePrivateKey"));
 
             // Application services
             services.AddScoped<IGameRoomSvc, GameRoomSvc>()
@@ -124,13 +124,15 @@ namespace Hangman
                 endpoints.MapControllers();
             });
 
-            // Migrations and seeding
-            Migrate(app, logger, executeSeedDb: env.IsEnvironment("Local"));
+            // Migrations and seeding - can't be run upon "Testing", as the serviceScope will close Singletons
+            // such as the DbContext used by tests and in production this definetly can't run
+            if (env.IsEnvironment("Local"))
+                MigrateAndSeed(app, logger);
 
             logger.LogInformation("Host configuration is all done!");
         }
 
-        public static void Migrate(IApplicationBuilder app, ILogger<Startup> logger, bool executeSeedDb = false)
+        public static void MigrateAndSeed(IApplicationBuilder app, ILogger<Startup> logger)
         {
             using var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope();
             using var context = serviceScope.ServiceProvider.GetService<SqlContext>();
@@ -141,9 +143,6 @@ namespace Hangman
                 logger.LogInformation("Applying migrations...");
                 context.Database.Migrate();
             }
-
-            // seeding DB only when asked
-            if (!executeSeedDb) return;
 
             logger.LogInformation("Seeding the database...");
             SeedDb(context, logger);
