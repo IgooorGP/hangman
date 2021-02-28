@@ -29,10 +29,11 @@ namespace Hangman.Migrations
                     CreatedAt = table.Column<DateTime>(nullable: false),
                     UpdatedAt = table.Column<DateTime>(nullable: true),
                     Username = table.Column<string>(maxLength: 100, nullable: false),
-                    Password = table.Column<string>(maxLength: 20, nullable: false),
+                    PasswordDigest = table.Column<byte[]>(nullable: false),
+                    PasswordSalt = table.Column<byte[]>(nullable: false),
+                    Role = table.Column<string>(maxLength: 50, nullable: false),
                     FirstName = table.Column<string>(maxLength: 100, nullable: false),
-                    LastName = table.Column<string>(maxLength: 100, nullable: false),
-                    Role = table.Column<string>(maxLength: 50, nullable: false)
+                    LastName = table.Column<string>(maxLength: 100, nullable: false)
                 },
                 constraints: table =>
                 {
