@@ -18,6 +18,11 @@ namespace Hangman.Core.Exceptions
         public ObjectDoesNotExist(string msg) : base(msg, HttpStatusCode.NotFound) { }
     }
 
+    public class ObjectAlreadyExists : HttpStatusException
+    {
+        public ObjectAlreadyExists(string msg) : base(msg, HttpStatusCode.BadRequest) { }
+    }
+
     public class AuthenticationFailure : HttpStatusException
     {
         public AuthenticationFailure(string msg) : base(msg, HttpStatusCode.BadRequest) { }

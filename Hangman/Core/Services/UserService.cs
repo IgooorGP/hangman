@@ -54,8 +54,8 @@ namespace Hangman.Core.Services
             var username = createUserRequestDTO.Username;
             var password = createUserRequestDTO.Password;
 
-            if (_db.Users.Any(user => x.Username == user.Username))
-                throw new Exception("Username " + username + "is already taken");
+            if (_db.Users.Any(user => user.Username == username))
+                throw new ObjectAlreadyExists($"Username {username} already exists. Try another one, please.");
 
             var (passwordSalt, passwordDigest) = HashPassword(password);
 
@@ -74,21 +74,20 @@ namespace Hangman.Core.Services
             return newUser;
         }
 
-        public Tuple<string, string> HashPassword(string password)
+        public Tuple<byte[], byte[]> HashPassword(string password)
         {
             // creates an hmac authentication code for generating 512 bytes digests
             using var hmac = new System.Security.Cryptography.HMACSHA512();
 
-            var passwordSalt = Encoding.UTF8.GetString(hmac.Key);
-            var passwordDigest = Encoding.UTF8.GetString(hmac.ComputeHash(Encoding.UTF8.GetBytes(password)));
+            var passwordSaltBytes = hmac.Key;
+            var passwordDigestBytes = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
 
-            return new Tuple<string, string>(passwordSalt, passwordDigest);
+            return new Tuple<byte[], byte[]>(passwordSaltBytes, passwordDigestBytes);
         }
 
-        public static bool VerifyPasswordHash(string loginAttemptPassword, string storedPasswordSalt, string storedPasswordDigest)
+        public static bool VerifyPasswordHash(string loginAttemptPassword,
+            byte[] storedPasswordSaltBytes, byte[] storedPasswordDigestBytes)
         {
-            var storedPasswordSaltBytes = Encoding.UTF8.GetBytes(storedPasswordSalt);
-            var storedPasswordDigestBytes = Encoding.UTF8.GetBytes(storedPasswordDigest);
             var passwordMatch = true;
 
             if (loginAttemptPassword == null)

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
@@ -11,8 +12,8 @@ namespace Hangman.Core.Models
     {
         // Security-related data
         public string Username { get; set; } = string.Empty;
-        public string PasswordDigest { get; set; } = string.Empty;
-        public string PasswordSalt { get; set; } = string.Empty;
+        public byte[] PasswordDigest { get; set; } = Array.Empty<byte>();
+        public byte[] PasswordSalt { get; set; } = Array.Empty<byte>();
         public string Role { get; set; } = string.Empty;
 
         // User data

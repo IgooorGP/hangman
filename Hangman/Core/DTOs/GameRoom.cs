@@ -28,7 +28,7 @@ namespace Hangman.Core.DTOs
     {
         public Guid Id { get; set; }
         public string Name { get; set; } = "";
-        public ICollection<PlayerResponseDTO>? Players { get; set; }
+        public ICollection<UserResponseDTO>? Players { get; set; }
         public ICollection<GuessWordResponseDTO>? GuessWords { get; set; }
     }
 
@@ -55,14 +55,5 @@ namespace Hangman.Core.DTOs
 
         [Required]
         public Guid PlayerId { get; set; }
-    }
-
-    public class PlayerInRoomDTO
-    {
-        public Guid playerId { get; set; }
-
-        public Guid gameRoomId { get; set; }
-
-        public bool isInRoom { get; set; }
     }
 }

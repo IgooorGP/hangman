@@ -11,7 +11,6 @@ namespace Hangman.Infrastructure.FluentSetup
             {
                 entity.Property(p => p.Username).IsRequired().HasMaxLength(100);
                 entity.HasIndex(p => p.Username).IsUnique();
-                entity.Property(p => p.Password).IsRequired().HasMaxLength(20);
                 entity.Property(p => p.FirstName).IsRequired().HasMaxLength(100);
                 entity.Property(p => p.LastName).IsRequired().HasMaxLength(100);
                 entity.Property(p => p.Role).IsRequired().HasMaxLength(50);

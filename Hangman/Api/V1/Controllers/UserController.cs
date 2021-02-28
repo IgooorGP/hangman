@@ -28,7 +28,8 @@ namespace Hangman.Api.V1.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] CreateUserRequestDTO createUserRequestDTO)
         {
-            // create user
+            _logger.LogInformation("Received new create user request {createUserRequestDTO}", createUserRequestDTO);
+
             var newUser = await _userSvc.Create(createUserRequestDTO);
             var newUserResponse = _mapper.Map<User, UserResponseDTO>(newUser);
 
