@@ -8,6 +8,9 @@ using Xunit;
 using FluentAssertions;
 using System.Net;
 using Microsoft.EntityFrameworkCore;
+using Hangman.Core.Models;
+using System;
+using Newtonsoft.Json;
 
 namespace Tests.Hangman.Integration
 {
@@ -40,6 +43,37 @@ namespace Tests.Hangman.Integration
             createdUser.FirstName.Should().Be(createUserRequest.FirstName);
             createdUser.LastName.Should().Be(createUserRequest.LastName);
             createdUser.Username.Should().Be(createUserRequest.Username);
+        }
+
+        [Fact(DisplayName = "Should not register a new user if his username is already taken")]
+        public async Task ShouldNotRegisterANewUserIfHisUsernameIsAlreadyTaken()
+        {
+            // Arrange
+            var createUserRequest = _fakerCreateUserRequest.Generate();
+            var previousUser = new User
+            {
+                FirstName = createUserRequest.FirstName,
+                LastName = createUserRequest.LastName,
+                Username = createUserRequest.Username,
+                PasswordDigest = Array.Empty<byte>(),
+                PasswordSalt = Array.Empty<byte>()
+            };
+
+            await _sqlContext.Users.AddAsync(previousUser);
+            await _sqlContext.SaveChangesAsync();
+
+            // Act - request with the same username
+            var response = await _webHostHttpClient.PostAsJsonAsync(_userRegisterEndpointV1, createUserRequest);
+
+            // Assert
+            var responseAsString = await response.Content.ReadAsStringAsync();
+            var responseDeserialized = JsonConvert.DeserializeObject<dynamic>(responseAsString);
+            var responseMessage = (string)responseDeserialized.Message;
+            var usersInDb = await _sqlContext.Users.CountAsync();
+
+            responseMessage.Should().Be($"Username {createUserRequest.Username} already exists. Try another one, please.");
+            usersInDb.Should().Be(1);  // no new user
+            response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         }
     }
 }
