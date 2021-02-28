@@ -30,11 +30,6 @@ namespace Tests.Hangman.Support
             services.RemoveAll<DbContextOptions<SqlContext>>();
             services.AddDbContext<SqlContext>(options =>
                 options.UseNpgsql(config.GetConnectionString("SqlConnection")), ServiceLifetime.Singleton, ServiceLifetime.Singleton);
-
-            var descriptors = services.Select(d => d.ServiceType == typeof(IHostedService));
-
-            // Hangfire and other IHostedServices are removed
-            //services.RemoveAll<IHostedService>();
         }
 
         public static void DefaultConfiguration(IServiceCollection services)
