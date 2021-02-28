@@ -49,17 +49,15 @@ namespace Hangman
             // Automapper
             services.AddAutoMapper(typeof(Startup));
 
-            // Configs binding
-            var secretsConfig = new SecretsConfig();
-
-            Configuration.Bind("Secrets", secretsConfig);
-            services.AddSingleton(secretsConfig);
+            // Configs (IOption) binding
+            services.Configure<SecretsConfig>(Configuration.GetSection("Secrets"));
 
             // Authentication with JWT signatures based on HMAC256 private key
             // services.AddJwtAuthentication(Configuration.GetValue<string>("Secrets:JwtSignaturePrivateKey"));
 
             // Application services
             services.AddScoped<IGameRoomSvc, GameRoomSvc>()
+                .AddScoped<IJwtSvc, JwtSvc>()
                 .AddScoped<IUserSvc, UserSvc>()
                 .AddScoped<IHangmanGame, HangmanGame>();
 

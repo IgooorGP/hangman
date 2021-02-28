@@ -12,7 +12,7 @@ using Hangman.Core.Models;
 using System;
 using Newtonsoft.Json;
 
-namespace Tests.Hangman.Integration
+namespace Tests.Hangman.Integration.Api.V1.Controllers
 {
     public class UserControllerTests : WebHostTestCase<Startup>
     {

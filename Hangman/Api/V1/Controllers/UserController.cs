@@ -13,27 +13,35 @@ namespace Hangman.Api.V1.Controllers
     [Route("api/v1/[controller]")]
     public class UserController : ControllerBase
     {
-        private readonly ILogger<UserController> _logger;
         private readonly IUserSvc _userSvc;
+        private readonly IJwtSvc _jwtSvc;
         private readonly IMapper _mapper;
 
-        public UserController(ILogger<UserController> logger, IUserSvc userSvc, IMapper mapper)
+        public UserController(IUserSvc userSvc, IJwtSvc jwtSvc, IMapper mapper)
         {
-            _logger = logger;
-            _userSvc = userSvc;
             _mapper = mapper;
+            _userSvc = userSvc;
+            _jwtSvc = jwtSvc;
         }
 
         [AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] CreateUserRequestDTO createUserRequestDTO)
         {
-            _logger.LogInformation("Received new create user request {createUserRequestDTO}", createUserRequestDTO);
-
             var newUser = await _userSvc.Create(createUserRequestDTO);
             var newUserResponse = _mapper.Map<User, UserResponseDTO>(newUser);
 
             return StatusCode(201, newUserResponse);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] AuthenticationRequestDTO authenticationRequestDTO)
+        {
+            var loggedUser = await _userSvc.Authenticate(authenticationRequestDTO);  // throws if authentication fails
+            var signedUserJwt = _jwtSvc.GenerateToken(loggedUser);
+
+            return Ok(new LoggedUserJwtResponseDTO { Username = loggedUser.Username, Token = signedUserJwt });
         }
     }
 }

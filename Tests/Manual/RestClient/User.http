@@ -1,0 +1,19 @@
+### Register
+POST http://localhost:8080/api/v1/user/register
+Content-Type: application/json
+
+{
+    "firstName": "Igor",
+    "lastName": "Grillo Peternella",
+    "username": "igp",
+    "password": "test123"
+}
+
+### Login
+POST http://localhost:8080/api/v1/user/login
+Content-Type: application/json
+
+{
+    "username": "igp",
+    "password": "test123"
+}

@@ -6,6 +6,7 @@ using Hangman.Core.DTOs;
 using Hangman.Core.Exceptions;
 using Hangman.Core.Models;
 using Hangman.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace Hangman.Core.Services
@@ -13,7 +14,7 @@ namespace Hangman.Core.Services
     public interface IUserSvc
     {
         public Task<User> Create(CreateUserRequestDTO createUserRequestDTO);
-        public User Authenticate(string username, string password);
+        public Task<User> Authenticate(AuthenticationRequestDTO authenticationRequestDTO);
     }
 
     public class UserSvc : IUserSvc
@@ -27,10 +28,13 @@ namespace Hangman.Core.Services
             _db = db;
         }
 
-        public User Authenticate(string username, string password)
+        public async Task<User> Authenticate(AuthenticationRequestDTO authenticationRequestDTO)
         {
+            var username = authenticationRequestDTO.Username;
+            var password = authenticationRequestDTO.Password;
+
             _logger.LogInformation("User {username} is trying to login...", username);
-            var user = _db.Users.SingleOrDefault(x => x.Username == username);
+            var user = await _db.Users.SingleOrDefaultAsync(x => x.Username == username);
 
             if (user is null)
             {
@@ -51,6 +55,8 @@ namespace Hangman.Core.Services
 
         public async Task<User> Create(CreateUserRequestDTO createUserRequestDTO)
         {
+            _logger.LogInformation("Received new create user request {createUserRequestDTO}", createUserRequestDTO);
+
             var username = createUserRequestDTO.Username;
             var password = createUserRequestDTO.Password;
 
@@ -89,15 +95,6 @@ namespace Hangman.Core.Services
             byte[] storedPasswordSaltBytes, byte[] storedPasswordDigestBytes)
         {
             var passwordMatch = true;
-
-            if (loginAttemptPassword == null)
-                throw new ArgumentNullException("loginAttemptPassword");
-            if (string.IsNullOrWhiteSpace(loginAttemptPassword))
-                throw new ArgumentException("Value cannot be empty or whitespace only string.", "password");
-            if (storedPasswordSaltBytes.Length != 128)
-                throw new ArgumentException("Invalid length of password salt (128 bytes expected).", "passwordHash");
-            if (storedPasswordSaltBytes.Length != 64)
-                throw new ArgumentException("Invalid length of password hash (64 bytes expected).", "passwordHash");
 
             // out of the previously stored salt, re-hash the login attempt password and compare with the previous digest!
             using (var hmac = new System.Security.Cryptography.HMACSHA512(storedPasswordSaltBytes))
