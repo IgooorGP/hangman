@@ -11,17 +11,23 @@ using Microsoft.EntityFrameworkCore;
 using Hangman.Core.Models;
 using System;
 using Newtonsoft.Json;
+using Microsoft.Extensions.DependencyInjection;
+using Moq;
+using Hangman.Core.Services;
+using System.Linq;
 
 namespace Tests.Hangman.Integration.Api.V1.Controllers
 {
     public class UserControllerTests : WebHostTestCase<Startup>
     {
         private readonly Faker<CreateUserRequestDTO> _fakerCreateUserRequest;
+        private readonly string _userLoginEndpointV1;
         private readonly string _userRegisterEndpointV1;
 
         public UserControllerTests()
         {
             _userRegisterEndpointV1 = "api/v1/user/register";
+            _userLoginEndpointV1 = "api/v1/user/login";
             _fakerCreateUserRequest = UserFakerFactory.CreateUserRequestDTOFaker();
         }
 
@@ -74,6 +80,44 @@ namespace Tests.Hangman.Integration.Api.V1.Controllers
             responseMessage.Should().Be($"Username {createUserRequest.Username} already exists. Try another one, please.");
             usersInDb.Should().Be(1);  // no new user
             response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        }
+
+        [Fact(DisplayName = "Should allow a user to login and generate a jwt token")]
+        public async Task ShouldAllowAUserToLoginAndGenerateAJwtToken()
+        {
+            // Arrange - rearrange test IWebHost with mock Jwt Svc
+            ResetWebHostFactory(TestInjections.DefaultConfigurationWithMockJwtSvc);
+
+            // Arrange - create an existing user to login
+            var createUserRequest = _fakerCreateUserRequest.Generate();
+            await _webHostHttpClient.PostAsJsonAsync(_userRegisterEndpointV1, createUserRequest);
+            _sqlContext.Users.Count().Should().Be(1);  // just 1 user: the newly created one
+
+            // Arrange - login as the same created user
+            var authenticateUserRequest = new AuthenticationRequestDTO
+            {
+                Username = createUserRequest.Username,
+                Password = createUserRequest.Password
+            };
+
+            // Arrange - configure jwt svc return
+            var mockJwtSvcManager = _testServiceScope.ServiceProvider.GetRequiredService<Mock<IJwtSvc>>();
+            var mockJwtSvc = _testServiceScope.ServiceProvider.GetRequiredService<IJwtSvc>();
+
+            mockJwtSvcManager.Setup(jwtSvc =>
+                jwtSvc.GenerateToken(It.IsAny<User>()))
+                    .Returns("jwtTokenTest");
+
+            // Act
+            var response = await _webHostHttpClient.PostAsJsonAsync(_userLoginEndpointV1, authenticateUserRequest);
+
+            // Assert
+            var responseAsString = await response.Content.ReadAsStringAsync();
+            var deserializedResponse = JsonConvert.DeserializeObject<LoggedUserJwtResponseDTO>(responseAsString);
+
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            deserializedResponse.Username.Should().Be(createUserRequest.Username);
+            deserializedResponse.Token.Should().Be("jwtTokenTest");  // mock output response
         }
     }
 }

@@ -1,10 +1,12 @@
 using System.Linq;
+using Hangman.Core.Services;
 using Hangman.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Moq;
 
 namespace Tests.Hangman.Support
 {
@@ -35,6 +37,17 @@ namespace Tests.Hangman.Support
         public static void DefaultConfiguration(IServiceCollection services)
         {
             AddDefaultServices(services);
+        }
+
+        public static void DefaultConfigurationWithMockJwtSvc(IServiceCollection services)
+        {
+            AddDefaultServices(services);
+
+            var mockJwtSvcManager = new Mock<IJwtSvc>();
+            var mockJwtSvc = mockJwtSvcManager.Object;
+
+            services.AddScoped(sp => mockJwtSvcManager);
+            services.AddScoped(sp => mockJwtSvc);
         }
     }
 }

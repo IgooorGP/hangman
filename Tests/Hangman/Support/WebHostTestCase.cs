@@ -24,6 +24,20 @@ namespace Tests.Hangman.Support
             AfterEachTest();
         }
 
+        public void ResetWebHostFactory(Action<IServiceCollection> newConfigureServices)
+        {
+            AfterEachTest(); // dispose of previously created services
+
+            var newFactory = new WebHostFactory<TStartup>(newConfigureServices);
+
+            // recreate services from new factory
+            _webHostHttpClient = newFactory.CreateClient();
+            _testServiceScope = newFactory.Server.Services.CreateScope();
+
+            _sqlContext = _testServiceScope.ServiceProvider.GetRequiredService<SqlContext>();
+            _sqlContextTransaction = _sqlContext.Database.BeginTransaction();
+        }
+
         private void BeforeEachTest(Action<IServiceCollection> configureServices)
         {
             configureServices ??= TestInjections.DefaultConfiguration;
