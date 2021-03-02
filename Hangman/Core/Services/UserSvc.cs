@@ -13,6 +13,7 @@ namespace Hangman.Core.Services
 {
     public interface IUserSvc
     {
+        public Task<User?> GetByUsername(string username);
         public Task<User> Create(CreateUserRequestDTO createUserRequestDTO);
         public Task<User> Authenticate(AuthenticationRequestDTO authenticationRequestDTO);
     }
@@ -26,6 +27,11 @@ namespace Hangman.Core.Services
         {
             _logger = logger;
             _db = db;
+        }
+
+        public async Task<User?> GetByUsername(string username)
+        {
+            return await _db.Users.SingleOrDefaultAsync(user => user.Username == username);
         }
 
         public async Task<User> Authenticate(AuthenticationRequestDTO authenticationRequestDTO)
