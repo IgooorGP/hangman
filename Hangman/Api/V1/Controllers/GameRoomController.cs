@@ -8,9 +8,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using AutoMapper;
 using Hangman.Api.Pagination;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Hangman.Api.V1.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/v1/[controller]")]
     public class GameRoomController : ControllerBase
