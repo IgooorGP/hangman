@@ -19,7 +19,7 @@ using FluentValidation.AspNetCore;
 using FluentValidation;
 using Hangman.Core.DTOs;
 using Hangman.Core.Validations;
-using Hangman.Infrastructure.ServiceCollectionExtensions;
+using Hangman.Infrastructure.Security;
 
 namespace Hangman
 {
@@ -53,7 +53,7 @@ namespace Hangman
             services.Configure<SecretsConfig>(Configuration.GetSection("Secrets"));
 
             // Authentication with JWT signatures based on HMAC256 private key
-            // services.AddJwtAuthentication(Configuration.GetValue<string>("Secrets:JwtSignaturePrivateKey"));
+            services.AddJwtAuthentication(Configuration.GetValue<string>("Secrets:JwtSignaturePrivateKey"));
 
             // Application services
             services.AddScoped<IGameRoomSvc, GameRoomSvc>()
@@ -79,7 +79,7 @@ namespace Hangman
             logger.LogInformation("Configuring start up with environment: {EnvironmentName}", env.EnvironmentName);
 
             // Middleware for Stacktrace pages
-            if (env.IsEnvironment("Local"))
+            if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
             else
                 app.UseExceptionHandler("/handler"); // Middleware for sending exceptions to exc controller handler
