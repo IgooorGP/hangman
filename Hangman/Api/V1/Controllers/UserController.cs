@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Hangman.Api.V1.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/v1/[controller]")]
     public class UserController : ControllerBase
