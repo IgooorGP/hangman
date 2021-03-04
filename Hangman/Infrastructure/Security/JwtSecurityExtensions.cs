@@ -12,44 +12,41 @@ namespace Hangman.Infrastructure.Security
         {
             var privateKey = Encoding.ASCII.GetBytes(JwtSignaturePrivateKey);
 
-            services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(options =>
-            {
-                options.RequireHttpsMetadata = false;
-                options.SaveToken = true;
-                options.TokenValidationParameters = new TokenValidationParameters
+            services
+                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
                 {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(privateKey),
-                    ValidateIssuer = false,
-                    ValidateAudience = false
-                };
-                // jwt bearer events to handle authentication
-                options.Events = new JwtBearerEvents
-                {
-                    // After jwt signature validation and ClaimsIdentity has been generated
-                    OnTokenValidated = async (context) =>
+                    options.RequireHttpsMetadata = false;
+                    options.SaveToken = true;
+                    options.TokenValidationParameters = new TokenValidationParameters
                     {
-                        var userSvc = context.HttpContext.RequestServices.GetRequiredService<IUserSvc>();
-                        var username = context.Principal.Identity.Name;
-
-                        if (username is null)
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(privateKey),
+                        ValidateIssuer = false,
+                        ValidateAudience = false
+                    };
+                    // jwt bearer events to handle authentication
+                    options.Events = new JwtBearerEvents
+                    {
+                        // After jwt signature validation and ClaimsIdentity has been generated
+                        OnTokenValidated = async (context) =>
                         {
-                            context.Fail("Unauthorized");
-                            return;
+                            var userSvc = context.HttpContext.RequestServices.GetRequiredService<IUserSvc>();
+                            var username = context.Principal.Identity.Name;
+
+                            if (username is null)
+                            {
+                                context.Fail("Unauthorized");
+                                return;
+                            }
+
+                            var user = await userSvc.GetByUsername(username);
+
+                            if (user is null)
+                                context.Fail("Unauthorized");
                         }
-
-                        var user = await userSvc.GetByUsername(username);
-
-                        if (user is null)
-                            context.Fail("Unauthorized");
-                    }
-                };
-            });
+                    };
+                });
         }
     }
 }
