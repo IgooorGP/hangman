@@ -11,10 +11,10 @@ namespace Hangman.Core.Validations
         public CreateGameRoomDTOValidator()
         {
             RuleFor(dto => dto.Name)
-            .NotEmpty()
-            .MaximumLength(100)
-            .Matches("[a-zA-Z]")
-            .WithMessage("Game room name must be a string with less than 100 chars (no numbers).");
+                .NotEmpty()
+                .MaximumLength(100)
+                .Matches("[a-zA-Z]")
+                .WithMessage("Game room name must be a string with less than 100 chars (no numbers).");
         }
     }
 }

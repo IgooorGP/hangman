@@ -5,13 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Hangman.Core.DTOs
 {
-    public class GameRoomDTO
-    {
-        [Required]
-        [StringLength(100, ErrorMessage = "Game room name can't exceed 100 characters.")]
-        public string Name { get; set; } = default!;
-    }
-
     public class SearchGameRoomDTO
     {
         public int PageSize { get; set; } = 10;
@@ -30,11 +23,6 @@ namespace Hangman.Core.DTOs
         public string Name { get; set; } = "";
         public ICollection<UserResponseDTO>? Players { get; set; }
         public ICollection<GuessWordResponseDTO>? GuessWords { get; set; }
-    }
-
-    public class PlayerDTO
-    {
-        public Guid PlayerId { get; set; }
     }
 
     public class JoinRoomDTO
