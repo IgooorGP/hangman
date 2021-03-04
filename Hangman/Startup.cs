@@ -25,12 +25,15 @@ namespace Hangman
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IWebHostEnvironment env)
         {
             Configuration = configuration;
+            Env = env;
         }
 
         public IConfiguration Configuration { get; }
+        public IWebHostEnvironment Env { get; set; }
+
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -53,6 +56,7 @@ namespace Hangman
             services.Configure<SecretsConfig>(Configuration.GetSection("Secrets"));
 
             // Authentication with JWT signatures based on HMAC256 private key
+            // Adds "Bearer" (Bearer tokens) as the default authentication scheme (algorithm/strategy)
             services.AddJwtAuthentication(Configuration.GetValue<string>("Secrets:JwtSignaturePrivateKey"));
 
             // Application services
@@ -79,7 +83,7 @@ namespace Hangman
             logger.LogInformation("Configuring start up with environment: {EnvironmentName}", env.EnvironmentName);
 
             // Middleware for Stacktrace pages
-            if (env.IsDevelopment())
+            if (env.IsDevelopment() || env.IsEnvironment("Testing"))
                 app.UseDeveloperExceptionPage();
             else
                 app.UseExceptionHandler("/handler"); // Middleware for sending exceptions to exc controller handler
