@@ -1,4 +1,7 @@
 using System;
+using Hangman;
+using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
@@ -21,32 +24,17 @@ namespace Tests.Hangman.Support
             _configureTestServices = configureTestServices ?? (services => { });
         }
 
-        protected override IHostBuilder CreateHostBuilder()
+        protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
-            // Clears all providers in our IHost/IWebHosts to set reloadOnChange: false to avoid excess of 
-            // file-os monitoring API usage on integration tests
-            var builder = base.CreateHostBuilder()
-                .ConfigureWebHost(builder =>
-                {
-                    // this builder is already configured to look for TStartup 
-                    // (using UseStart() will invoke TStartup twice)
-                    builder
-                        .ConfigureAppConfiguration((hostingContext, configBuilder) =>
-                        {
-                            configBuilder.Sources.Clear();
-                            configBuilder.AddJsonFile("appsettings.json", optional: true, reloadOnChange: false);
-                        })
-                        .ConfigureTestServices(_configureTestServices);  // overrides TStartup.ConfigureServices
-                })
+            // builder is already configured to call TStartup automatically
+            builder
                 .ConfigureAppConfiguration((hostingContext, configBuilder) =>
                 {
-                    configBuilder.Sources.Clear();
+                    configBuilder.Sources.Clear();  // no json providers with reloadOnChange: true (no inotify API use)
                     configBuilder.AddJsonFile("appsettings.json", optional: true, reloadOnChange: false);
                 })
-                .UseEnvironment("Testing")
-                .UseSerilog();
-
-            return builder;
+                .UseSetting("Environment", "Testing")
+                .ConfigureTestServices(_configureTestServices);
         }
     }
 }
