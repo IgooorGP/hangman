@@ -19,7 +19,7 @@ namespace Tests.Hangman.Integration.Api.V1.Controllers
         private readonly Faker<CreateGameRoomDTO> _fakerCreateGameRoomDTO;
         private readonly string _gameRoomEndpointV1;
 
-        public GameRoomControllerTests() : base(TestInjections.DefaultConfigurationNoAuth)
+        public GameRoomControllerTests() : base(TestServiceCollections.ConfigureServices_FakeAuthHandler)
         {
             _gameRoomEndpointV1 = "api/v1/gameroom";
             _fakerCreateGameRoomDTO = GameRoomFactory.CreateGameRoomDTOFaker();
@@ -30,7 +30,7 @@ namespace Tests.Hangman.Integration.Api.V1.Controllers
         {
             // Arrange
             var createGameRoomRequest = _fakerCreateGameRoomDTO.Generate();
-            _webHostHttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Test");  // dummy scheme for testing
+            _webHostHttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("TestingScheme");
 
             // Act
             var response = await _webHostHttpClient.PostAsJsonAsync(_gameRoomEndpointV1, createGameRoomRequest);

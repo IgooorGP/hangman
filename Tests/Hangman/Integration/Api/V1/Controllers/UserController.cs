@@ -86,7 +86,7 @@ namespace Tests.Hangman.Integration.Api.V1.Controllers
         public async Task ShouldAllowAUserToLoginAndGenerateAJwtToken()
         {
             // Arrange - rearrange test IWebHost with mock Jwt Svc
-            ConfigureTestServices(TestInjections.DefaultConfigurationWithMockJwtSvc);
+            ConfigureTestServices(TestServiceCollections.ConfigureServices_MockJwtSvc);
 
             // Arrange - create an existing user to login
             var createUserRequest = _fakerCreateUserRequest.Generate();

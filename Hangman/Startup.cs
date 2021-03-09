@@ -83,7 +83,7 @@ namespace Hangman
             logger.LogInformation("Configuring start up with environment: {EnvironmentName}", env.EnvironmentName);
 
             // Middleware for Stacktrace pages
-            if (env.IsDevelopment() || env.IsEnvironment("Testing"))
+            if (env.IsDevelopment() || env.IsEnvironment("Local"))
                 app.UseDeveloperExceptionPage();
             else
                 app.UseExceptionHandler("/handler"); // Middleware for sending exceptions to exc controller handler

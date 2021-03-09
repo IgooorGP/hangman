@@ -17,6 +17,7 @@ namespace Tests.Hangman.Support
 
         public WebHostTestCase(Action<IServiceCollection> configureServices = null)
         {
+            configureServices ??= TestServiceCollections.ConfigureServices_Default;
             BeforeEachTest(configureServices);
         }
 
@@ -27,7 +28,6 @@ namespace Tests.Hangman.Support
 
         private void BeforeEachTest(Action<IServiceCollection> configureServices)
         {
-            configureServices ??= TestInjections.DefaultConfiguration;
             var factory = new WebHostFactory<TStartup>(configureServices);
 
             _webHostHttpClient = factory.CreateClient();
