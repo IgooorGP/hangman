@@ -9,6 +9,9 @@ using Microsoft.Extensions.Logging;
 using AutoMapper;
 using Hangman.Api.Pagination;
 using Microsoft.AspNetCore.Authorization;
+using Hangman.Core.Exceptions;
+using System.Linq;
+using Microsoft.AspNetCore.Http;
 
 namespace Hangman.Api.V1.Controllers
 {
@@ -17,15 +20,21 @@ namespace Hangman.Api.V1.Controllers
     [Route("api/v1/[controller]")]
     public class GameRoomController : ControllerBase
     {
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<GameRoomController> _logger;
         private readonly IGameRoomSvc _gameRoomSvc;
+        private readonly IUserSvc _userSvc;
         private readonly IMapper _mapper;
 
         public GameRoomController(IGameRoomSvc gameRoomSvc,
+            IUserSvc userSvc,
             ILogger<GameRoomController> logger,
+            IHttpContextAccessor httpContextAccessor,
             IMapper mapper)
         {
+            _httpContextAccessor = httpContextAccessor;
             _gameRoomSvc = gameRoomSvc;
+            _userSvc = userSvc;
             _logger = logger;
             _mapper = mapper;
         }
@@ -52,7 +61,8 @@ namespace Hangman.Api.V1.Controllers
         [HttpPost]
         public async Task<ActionResult> Create(CreateGameRoomDTO createGameRoomDTO)
         {
-            var createdGameRoom = await _gameRoomSvc.Create(createGameRoomDTO);
+            var user = await _userSvc.GetRequiredByUsername(User.Identity.Name);
+            var createdGameRoom = await _gameRoomSvc.Create(createGameRoomDTO, user);
             var gameRoomResponse = _mapper.Map<GameRoom, GameRoomResponseDTO>(createdGameRoom);
 
             return CreatedAtAction(nameof(GetById), new { gameRoomId = gameRoomResponse.Id }, gameRoomResponse);

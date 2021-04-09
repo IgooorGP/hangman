@@ -9,13 +9,14 @@ using Hangman.Infrastructure;
 using Hangman.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Security.Claims;
 
 namespace Hangman.Core.Services
 {
     public interface IGameRoomSvc
     {
         public Task<GameRoom> GetById(Guid gameRoomId);
-        public Task<GameRoom> Create(CreateGameRoomDTO createGameRoomDTO);
+        public Task<GameRoom> Create(CreateGameRoomDTO createGameRoomDTO, User user);
         public Task<Tuple<IList<GameRoom>, int>> GetPaginated(SearchGameRoomDTO searchGameRoomDTO);
     }
 
@@ -64,17 +65,28 @@ namespace Hangman.Core.Services
             return new Tuple<IList<GameRoom>, int>(gameRooms, totalGameRooms);
         }
 
-        public async Task<GameRoom> Create(CreateGameRoomDTO createGameRoomDTO)
+        public async Task<GameRoom> Create(CreateGameRoomDTO createGameRoomDTO, User user)
         {
             _logger.LogInformation("Creating new game room...");
             var newGameRoom = _mapper.Map<CreateGameRoomDTO, GameRoom>(createGameRoomDTO);
             await _db.GameRooms.AddAsync(newGameRoom);
 
+            _logger.LogInformation("Creating new game room user...");
+            var gameRoomUser = new GameRoomUser
+            {
+                User = user,
+                UserId = user.Id,
+                GameRoomId = newGameRoom.Id,
+                GameRoom = newGameRoom,
+                IsHost = true,
+                IsInRoom = true
+            };
+            await _db.GameRoomUsers.AddAsync(gameRoomUser);
+
             _logger.LogInformation("Commiting...");
             await _db.SaveChangesAsync();
 
             _logger.LogInformation("Returning new game room...");
-
             return newGameRoom;
         }
     }
