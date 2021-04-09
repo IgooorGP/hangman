@@ -28,7 +28,7 @@ namespace Tests.Hangman.Integration.Api.V1.Controllers
         {
             _userRegisterEndpointV1 = "api/v1/user/register";
             _userLoginEndpointV1 = "api/v1/user/login";
-            _fakerCreateUserRequest = UserFakerFactory.CreateUserRequestDTOFaker();
+            _fakerCreateUserRequest = new CreateUserRequestFaker();
         }
 
         [Fact(DisplayName = "Should register a new user")]
