@@ -63,7 +63,7 @@ namespace Tests.Hangman.Support
             protected override Task<AuthenticateResult> HandleAuthenticateAsync()
             {
                 // dummy authentication handler for 'TestingScheme'
-                var claims = new[] { new Claim(ClaimTypes.Name, "Test user") };
+                var claims = new[] { new Claim(ClaimTypes.Name, "TestUsername") };
                 var identity = new ClaimsIdentity(claims, SchemeName);
                 var principal = new ClaimsPrincipal(identity);
                 var ticket = new AuthenticationTicket(principal, SchemeName);
