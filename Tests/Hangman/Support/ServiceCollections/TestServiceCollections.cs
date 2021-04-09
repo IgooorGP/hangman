@@ -51,7 +51,6 @@ namespace Tests.Hangman.Support
                     ServiceLifetime.Singleton, ServiceLifetime.Singleton);
         }
 
-
         public class FakeAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions>
         {
             public const string SchemeName = "TestingScheme";
@@ -71,6 +70,7 @@ namespace Tests.Hangman.Support
                 return Task.FromResult(AuthenticateResult.Success(ticket));
             }
         }
+
         public static IConfigurationRoot BuildAppConfiguration()
         {
             var configuration = new ConfigurationBuilder()

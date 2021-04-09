@@ -69,4 +69,29 @@ namespace Tests.Hangman.Integration.Api.V1.Controllers
             createdGameRoom.GameRoomUsers.First().IsHost.Should().BeTrue();
         }
     }
+
+    public class GameRoomControllerNoFakeAuthTests : WebHostTestCase<Startup>
+    {
+        private readonly Faker<CreateGameRoomDTO> _fakerCreateGameRoomDTO;
+        private readonly string _gameRoomEndpointV1;
+
+        public GameRoomControllerNoFakeAuthTests()
+        {
+            _fakerCreateGameRoomDTO = new CreateGameRoomRequestFaker();
+            _gameRoomEndpointV1 = "api/v1/gameroom";
+        }
+
+        [Fact(DisplayName = "Should not create a new gameroom for unauthenticated user")]
+        public async Task ShouldNotCreateANewGameRoomForUnauthenticatedUser()
+        {
+            // Arrange - add new create game room DTO (no mocked security scheme)
+            var createGameRoomRequest = _fakerCreateGameRoomDTO.Generate();
+
+            // Act
+            var response = await _webHostHttpClient.PostAsJsonAsync(_gameRoomEndpointV1, createGameRoomRequest);
+
+            // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        }
+    }
 }
