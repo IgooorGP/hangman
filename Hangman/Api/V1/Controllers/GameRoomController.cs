@@ -61,8 +61,9 @@ namespace Hangman.Api.V1.Controllers
         [HttpPost]
         public async Task<ActionResult> Create(CreateGameRoomDTO createGameRoomDTO)
         {
-            var user = await _userSvc.GetRequiredByUsername(User.Identity.Name);
-            var createdGameRoom = await _gameRoomSvc.Create(createGameRoomDTO, user);
+            var username = User.Identity.Name;
+
+            var createdGameRoom = await _gameRoomSvc.Create(createGameRoomDTO, username);
             var gameRoomResponse = _mapper.Map<GameRoom, GameRoomResponseDTO>(createdGameRoom);
 
             return CreatedAtAction(nameof(GetById), new { gameRoomId = gameRoomResponse.Id }, gameRoomResponse);

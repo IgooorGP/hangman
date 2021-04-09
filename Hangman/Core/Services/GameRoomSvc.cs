@@ -16,18 +16,20 @@ namespace Hangman.Core.Services
     public interface IGameRoomSvc
     {
         public Task<GameRoom> GetById(Guid gameRoomId);
-        public Task<GameRoom> Create(CreateGameRoomDTO createGameRoomDTO, User user);
+        public Task<GameRoom> Create(CreateGameRoomDTO createGameRoomDTO, string? username);
         public Task<Tuple<IList<GameRoom>, int>> GetPaginated(SearchGameRoomDTO searchGameRoomDTO);
     }
 
     public class GameRoomSvc : IGameRoomSvc
     {
         private readonly ILogger<GameRoomSvc> _logger;
+        private readonly IUserSvc _userSvc;
         private readonly IMapper _mapper;
         private readonly SqlContext _db;
 
-        public GameRoomSvc(SqlContext db, ILogger<GameRoomSvc> logger, IMapper mapper)
+        public GameRoomSvc(SqlContext db, ILogger<GameRoomSvc> logger, IUserSvc userSvc, IMapper mapper)
         {
+            _userSvc = userSvc;
             _logger = logger;
             _mapper = mapper;
             _db = db;
@@ -65,13 +67,16 @@ namespace Hangman.Core.Services
             return new Tuple<IList<GameRoom>, int>(gameRooms, totalGameRooms);
         }
 
-        public async Task<GameRoom> Create(CreateGameRoomDTO createGameRoomDTO, User user)
+        public async Task<GameRoom> Create(CreateGameRoomDTO createGameRoomDTO, string? username)
         {
+            _logger.LogInformation($"Fetching user with username: {username} ...");
+            var user = await _userSvc.GetRequiredByUsername(username);
+
             _logger.LogInformation("Creating new game room...");
             var newGameRoom = _mapper.Map<CreateGameRoomDTO, GameRoom>(createGameRoomDTO);
             await _db.GameRooms.AddAsync(newGameRoom);
 
-            _logger.LogInformation("Creating new game room user...");
+            _logger.LogDebug("Creating new game room user...");
             var gameRoomUser = new GameRoomUser
             {
                 User = user,
@@ -83,7 +88,7 @@ namespace Hangman.Core.Services
             };
             await _db.GameRoomUsers.AddAsync(gameRoomUser);
 
-            _logger.LogInformation("Commiting...");
+            _logger.LogDebug("Commiting...");
             await _db.SaveChangesAsync();
 
             _logger.LogInformation("Returning new game room...");
