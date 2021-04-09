@@ -41,6 +41,9 @@ namespace Hangman
             services.AddDbContext<SqlContext>(options =>
                 options.UseNpgsql(Configuration.GetConnectionString("SqlConnection")));
 
+            // Http Ctx accessor
+            services.AddHttpContextAccessor();
+
             // Health-check services
             services.AddHealthChecks()
                 .AddNpgSql(Configuration.GetConnectionString("SqlConnection"));
@@ -138,6 +141,9 @@ namespace Hangman
         {
             using var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope();
             using var context = serviceScope.ServiceProvider.GetService<SqlContext>();
+
+            if (context is null)
+                return;
 
             // always execute possible missing migrations
             if (context.Database.GetPendingMigrations().ToList().Any())
