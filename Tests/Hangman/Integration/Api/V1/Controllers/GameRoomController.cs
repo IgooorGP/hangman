@@ -81,8 +81,9 @@ namespace Tests.Hangman.Integration.Api.V1.Controllers
         public async Task ShouldGuaranteeUserCanJoinRoom()
         {
             // Arrange - creates a user, game room and game room user
+            var hostUserFaker = new CreateUserFaker("HostUserName");  // cannot conflict usernames (host and user)
             var gameRoomUser = await GameRoomSeeds
-                .GameRoomWithHost(_fakerGameRoom.Generate(), _fakerUser.Generate(), _sqlContext);
+                .GameRoomWithHost(_fakerGameRoom.Generate(), hostUserFaker.Generate(), _sqlContext);
             var gameRoom = gameRoomUser.GameRoom;
             var hostUser = gameRoomUser.User;
             var anotherUser = await UserSeeds.User(_fakerUser.Generate(), _sqlContext);
@@ -91,18 +92,91 @@ namespace Tests.Hangman.Integration.Api.V1.Controllers
             var response = await _webHostHttpClient.PostAsync(_gameRoomJoinEndpointV1 + $"/{gameRoom.Id}", null);
 
             // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+
             var responseAsString = await response.Content.ReadAsStringAsync();
-            var responseDeserializedDynamic = JsonConvert.DeserializeObject<dynamic>(responseAsString);  // JOBject
+            var responseDeserialized = JsonConvert.DeserializeObject<UserInRoomDTO>(responseAsString);  // JOBject
 
-            response.StatusCode.Should().Be(HttpStatusCode.Ok);
+            responseDeserialized.GameRoomId.Should().Be(gameRoom.Id);
+            responseDeserialized.UserId.Should().Be(anotherUser.Id);  // another user is now in the room
+            responseDeserialized.InRoom.Should().BeTrue();
 
-            var gameRoomId = (Guid)responseDeserializedDynamic["gameRoomId"];
-            var userId = (Guid)responseDeserializedDynamic["userId"];
-            var inRoom = (bool)responseDeserializedDynamic["InRoom"];
+            // Assert - Database
+            var totalUsersInRoom = await _sqlContext.GameRoomUsers.CountAsync();
+            totalUsersInRoom.Should().Be(2);  // hostUser and anotherUser
 
-            gameRoomId.Should().Be(gameRoom.Id);
-            userId.Should().Be(anotherUser.Id);  // another user is now in the room
-            inRoom.Should().BeTrue();
+            var hostGameRoomUser = await _sqlContext.GameRoomUsers
+                .Where(gameRoomUser => gameRoomUser.UserId == hostUser.Id)
+                .FirstOrDefaultAsync();
+
+            hostGameRoomUser.Should().NotBeNull();
+            hostGameRoomUser.IsHost.Should().BeTrue();
+            hostGameRoomUser.IsInRoom.Should().BeTrue();
+
+            var anotherGameRoomUser = await _sqlContext.GameRoomUsers
+                .Where(gameRoomUser => gameRoomUser.UserId == anotherUser.Id)
+                .FirstOrDefaultAsync();
+
+            anotherGameRoomUser.Should().NotBeNull();
+            anotherGameRoomUser.IsHost.Should().BeFalse();
+            anotherGameRoomUser.IsInRoom.Should().BeTrue();
+        }
+
+        [Fact(DisplayName = "Should guarantee a user can rejoin a room after having left it")]
+        public async Task ShouldGuaranteeUserCanRejoinRoomAfterHavingLeftIt()
+        {
+            // Arrange - creates a user, game room and game room user
+            var hostUserFaker = new CreateUserFaker("HostUserName");  // cannot conflict usernames (host and user)
+            var gameRoomUser = await GameRoomSeeds
+                .GameRoomWithHost(_fakerGameRoom.Generate(), hostUserFaker.Generate(), _sqlContext);
+            var gameRoom = gameRoomUser.GameRoom;
+            var hostUser = gameRoomUser.User;
+            var anotherUser = await UserSeeds.User(_fakerUser.Generate(), _sqlContext);
+            var previousGameRoomUser = new GameRoomUser
+            {
+                User = anotherUser,
+                UserId = anotherUser.Id,
+                GameRoom = gameRoom,
+                GameRoomId = gameRoom.Id,
+                IsHost = false,
+                IsInRoom = false // another user had left the room
+            };
+
+            await _sqlContext.GameRoomUsers.AddAsync(previousGameRoomUser);
+            await _sqlContext.SaveChangesAsync();
+
+            // Act - join the room
+            var response = await _webHostHttpClient.PostAsync(_gameRoomJoinEndpointV1 + $"/{gameRoom.Id}", null);
+
+            // Assert
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+            var responseAsString = await response.Content.ReadAsStringAsync();
+            var responseDeserialized = JsonConvert.DeserializeObject<UserInRoomDTO>(responseAsString);  // JOBject
+
+            responseDeserialized.GameRoomId.Should().Be(gameRoom.Id);
+            responseDeserialized.UserId.Should().Be(anotherUser.Id);  // another user is now in the room
+            responseDeserialized.InRoom.Should().BeTrue();
+
+            // Assert - Database
+            var totalUsersInRoom = await _sqlContext.GameRoomUsers.CountAsync();
+            totalUsersInRoom.Should().Be(2);  // hostUser and anotherUser
+
+            var hostGameRoomUser = await _sqlContext.GameRoomUsers
+                .Where(gameRoomUser => gameRoomUser.UserId == hostUser.Id)
+                .FirstOrDefaultAsync();
+
+            hostGameRoomUser.Should().NotBeNull();
+            hostGameRoomUser.IsHost.Should().BeTrue();
+            hostGameRoomUser.IsInRoom.Should().BeTrue();
+
+            var anotherGameRoomUser = await _sqlContext.GameRoomUsers
+                .Where(gameRoomUser => gameRoomUser.UserId == anotherUser.Id)
+                .FirstOrDefaultAsync();
+
+            anotherGameRoomUser.Should().NotBeNull();
+            anotherGameRoomUser.IsHost.Should().BeFalse();
+            anotherGameRoomUser.IsInRoom.Should().BeTrue();
         }
     }
 

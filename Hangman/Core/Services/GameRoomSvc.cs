@@ -102,26 +102,56 @@ namespace Hangman.Core.Services
             var user = await _userSvc.GetByUsernameRequired(username);
 
             _logger.LogInformation($"Fetching game room: {gameRoomId} ...");
-            var gameRoomUser = await _db.GameRoomUsers
-                .Where(gameRoomUser => gameRoomUser.GameRoomId == gameRoomId && gameRoomUser.UserId == user.Id)
+            var gameRoom = await _db.GameRooms
+                .Where(gameRoom => gameRoom.Id == gameRoomId)
+                .Include(gameRoom => gameRoom.GameRoomUsers)  // fetches related entity
                 .FirstOrDefaultAsync();
 
-            // can only be null here if the game room does not exist (user is validated w/ middleware!)
-            if (gameRoomUser is null)
+            if (gameRoom is null)
                 throw new ObjectDoesNotExist("Game room was not found.");
 
-            // joins the room
-            gameRoomUser.IsInRoom = true;
+            var gameRoomUser = gameRoom.GameRoomUsers
+                .Where(gameRoomUser => gameRoomUser.UserId == user.Id)
+                .FirstOrDefault();
 
-            _db.GameRoomUsers.Update(gameRoomUser);
-            await _db.SaveChangesAsync();
+            if (gameRoomUser is null)
+                gameRoomUser = await AddUserToRoom(user.Id, gameRoomId);
+            else
+                gameRoomUser = await UpdateUserInRoom(gameRoomUser, user.Id, gameRoomId);
 
             return new UserInRoomDTO
             {
-                GameRoomId = gameRoomId,
-                UserId = user.Id,
+                GameRoomId = gameRoomUser.GameRoomId,
+                UserId = gameRoomUser.UserId,
                 InRoom = true
             };
+        }
+
+        private async Task<GameRoomUser> AddUserToRoom(Guid userId, Guid gameRoomId)
+        {
+            var gameRoomUser = new GameRoomUser
+            {
+                UserId = userId,
+                GameRoomId = gameRoomId,
+                IsInRoom = true
+            };
+
+            await _db.GameRoomUsers.AddAsync(gameRoomUser);
+            await _db.SaveChangesAsync();
+
+            return gameRoomUser;
+        }
+
+        private async Task<GameRoomUser> UpdateUserInRoom(GameRoomUser gameRoomUser, Guid userId, Guid gameRoomId)
+        {
+            // update values
+            gameRoomUser.UserId = userId;
+            gameRoomUser.GameRoomId = gameRoomId;
+            gameRoomUser.IsInRoom = true;
+
+            await _db.SaveChangesAsync();
+
+            return gameRoomUser;
         }
     }
 }
