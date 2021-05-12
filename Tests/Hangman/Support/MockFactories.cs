@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using Bogus;
 using Hangman.Core.DTOs;
@@ -5,6 +6,7 @@ using Hangman.Core.Models;
 
 namespace Tests.Hangman.Support
 {
+    // DTO fakers
     public class CreateUserRequestFaker : Faker<CreateUserRequestDTO>
     {
         public CreateUserRequestFaker()
@@ -13,6 +15,25 @@ namespace Tests.Hangman.Support
             RuleFor(u => u.LastName, f => f.Name.LastName());
             RuleFor(u => u.Username, (f, u) => f.Internet.UserName(u.FirstName, u.LastName));
             RuleFor(u => u.Password, f => f.Internet.Password(6));
+        }
+    }
+
+    public class CreateGameRoomRequestFaker : Faker<CreateGameRoomDTO>
+    {
+        public CreateGameRoomRequestFaker()
+        {
+            RuleFor(room => room.Name, faker => $"{faker.Name.FirstName()}'s room");
+        }
+    }
+
+    // Entities/Models fakers
+    public class CreateGameRoomFaker : Faker<GameRoom>
+    {
+        public CreateGameRoomFaker()
+        {
+            var gameRoomName = $"Room {Guid.NewGuid()}";
+
+            RuleFor(room => room.Name, gameRoomName);
         }
     }
 
@@ -25,14 +46,6 @@ namespace Tests.Hangman.Support
             RuleFor(u => u.Username, (f, u) => username);
             RuleFor(u => u.PasswordSalt, (f, u) => Encoding.UTF8.GetBytes(u.FirstName));  // simulates byte[]
             RuleFor(u => u.PasswordDigest, (f, u) => Encoding.UTF8.GetBytes(u.LastName));  // simulates byte[]
-        }
-    }
-
-    public class CreateGameRoomRequestFaker : Faker<CreateGameRoomDTO>
-    {
-        public CreateGameRoomRequestFaker()
-        {
-            RuleFor(room => room.Name, faker => $"{faker.Name.FirstName()}'s room");
         }
     }
 }

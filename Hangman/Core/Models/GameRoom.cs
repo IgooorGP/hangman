@@ -10,11 +10,7 @@ namespace Hangman.Core.Models
     public class GameRoom : BaseEntity
     {
         public string Name { get; set; } = null!;
-
-        // fk to join table for many-to-many relationships to access Users
         public ICollection<GameRoomUser> GameRoomUsers { get; set; } = null!;
-
-        // one-to-many
         public ICollection<GuessWord> GuessWords { get; set; } = null!;
     }
 
@@ -23,11 +19,11 @@ namespace Hangman.Core.Models
     /// </summary>
     public class GameRoomUser : BaseEntity
     {
-        // one-to-many with GameRoom
+        // many-to-one (FK) with GameRoom
         public Guid GameRoomId { get; set; }
         public GameRoom GameRoom { get; set; } = null!;
 
-        // one-to-many with User
+        // many-to-one (FK) with User
         public User User { get; set; } = null!;
         public Guid UserId { get; set; }
 

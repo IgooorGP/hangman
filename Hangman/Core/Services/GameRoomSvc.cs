@@ -17,6 +17,7 @@ namespace Hangman.Core.Services
     {
         public Task<GameRoom> GetById(Guid gameRoomId);
         public Task<GameRoom> Create(CreateGameRoomDTO createGameRoomDTO, string? username);
+        public Task<UserInRoomDTO> JoinRoom(Guid gameRoomId, string? username);
         public Task<Tuple<IList<GameRoom>, int>> GetPaginated(SearchGameRoomDTO searchGameRoomDTO);
     }
 
@@ -70,7 +71,7 @@ namespace Hangman.Core.Services
         public async Task<GameRoom> Create(CreateGameRoomDTO createGameRoomDTO, string? username)
         {
             _logger.LogInformation($"Fetching user with username: {username} ...");
-            var user = await _userSvc.GetRequiredByUsername(username);
+            var user = await _userSvc.GetByUsernameRequired(username);
 
             _logger.LogInformation("Creating new game room...");
             var newGameRoom = _mapper.Map<CreateGameRoomDTO, GameRoom>(createGameRoomDTO);
@@ -93,6 +94,34 @@ namespace Hangman.Core.Services
 
             _logger.LogInformation("Returning new game room...");
             return newGameRoom;
+        }
+
+        public async Task<UserInRoomDTO> JoinRoom(Guid gameRoomId, string? username)
+        {
+            _logger.LogInformation($"Fetching user with username: {username} ...");
+            var user = await _userSvc.GetByUsernameRequired(username);
+
+            _logger.LogInformation($"Fetching game room: {gameRoomId} ...");
+            var gameRoomUser = await _db.GameRoomUsers
+                .Where(gameRoomUser => gameRoomUser.GameRoomId == gameRoomId && gameRoomUser.UserId == user.Id)
+                .FirstOrDefaultAsync();
+
+            // can only be null here if the game room does not exist (user is validated w/ middleware!)
+            if (gameRoomUser is null)
+                throw new ObjectDoesNotExist("Game room was not found.");
+
+            // joins the room
+            gameRoomUser.IsInRoom = true;
+
+            _db.GameRoomUsers.Update(gameRoomUser);
+            await _db.SaveChangesAsync();
+
+            return new UserInRoomDTO
+            {
+                GameRoomId = gameRoomId,
+                UserId = user.Id,
+                InRoom = true
+            };
         }
     }
 }

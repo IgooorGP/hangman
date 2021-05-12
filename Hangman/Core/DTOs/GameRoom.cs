@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Hangman.Core.DTOs
 {
@@ -25,15 +24,11 @@ namespace Hangman.Core.DTOs
         public ICollection<GuessWordResponseDTO>? GuessWords { get; set; }
     }
 
-    public class JoinRoomDTO
+    public class UserInRoomDTO
     {
-        [Required]
         public Guid GameRoomId { get; set; }
-
-        [Required]
-        public Guid PlayerId { get; set; }
-
-        public bool IsHost { get; set; }
+        public Guid UserId { get; set; }
+        public bool InRoom { get; set; }
     }
 
     public class LeaveRoomDTO

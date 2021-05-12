@@ -14,7 +14,7 @@ namespace Hangman.Core.Services
     public interface IUserSvc
     {
         public Task<User?> GetByUsername(string username);
-        public Task<User> GetRequiredByUsername(string? username);
+        public Task<User> GetByUsernameRequired(string? username);
         public Task<User> Create(CreateUserRequestDTO createUserRequestDTO);
         public Task<User> Authenticate(AuthenticationRequestDTO authenticationRequestDTO);
     }
@@ -35,7 +35,7 @@ namespace Hangman.Core.Services
             return await _db.Users.SingleOrDefaultAsync(user => user.Username == username);
         }
 
-        public async Task<User> GetRequiredByUsername(string? username)
+        public async Task<User> GetByUsernameRequired(string? username)
         {
             if (string.IsNullOrEmpty(username))
                 throw new UnauthorizedAccessException("Username was null or empty after authentication!");

@@ -9,8 +9,6 @@ using Microsoft.Extensions.Logging;
 using AutoMapper;
 using Hangman.Api.Pagination;
 using Microsoft.AspNetCore.Authorization;
-using Hangman.Core.Exceptions;
-using System.Linq;
 using Microsoft.AspNetCore.Http;
 
 namespace Hangman.Api.V1.Controllers
@@ -67,6 +65,16 @@ namespace Hangman.Api.V1.Controllers
             var gameRoomResponse = _mapper.Map<GameRoom, GameRoomResponseDTO>(createdGameRoom);
 
             return CreatedAtAction(nameof(GetById), new { gameRoomId = gameRoomResponse.Id }, gameRoomResponse);
+        }
+
+        [HttpPost]
+        [Route("join/{gameRoomId}")]
+        public async Task<ActionResult> JoinRoom([FromRoute] Guid gameRoomId)
+        {
+            var username = User.Identity.Name;
+            var userInRoomDTO = await _gameRoomSvc.JoinRoom(gameRoomId, username);
+
+            return Ok(userInRoomDTO);
         }
     }
 }
